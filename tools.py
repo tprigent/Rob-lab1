@@ -35,3 +35,9 @@ def receive(ser, timeout):
                 if deltat > timeout:
                     flag = False
     return output
+
+
+def send(ser, msg):
+    msg_to_send = msg + '\b'
+    msg_bytes = bytes(msg_to_send, 'utf-8')
+    ser.write(msg_bytes)
