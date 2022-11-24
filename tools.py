@@ -27,7 +27,7 @@ def receive(ser, timeout):
             # Print the contents of the serial data
             try:
                 output = ser_string.decode("Ascii")
-                print(ser_string.decode("Ascii"))
+                print('>>> ' + ser_string.decode("Ascii"))
             except:
                 pass
             else:
@@ -38,6 +38,8 @@ def receive(ser, timeout):
 
 
 def send(ser, msg):
+    print('<<< ' + msg)
     msg_to_send = msg + '\b'
     msg_bytes = bytes(msg_to_send, 'utf-8')
     ser.write(msg_bytes)
+    receive(ser, 2)
