@@ -1,2 +1,4 @@
 *.idea
 __pycache__
+output-images
+*.DS_Store
