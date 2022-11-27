@@ -1,5 +1,5 @@
 import numpy
-import tools
+import serial_tools
 
 
 class Point:
@@ -18,8 +18,8 @@ class Point:
 
 # create a point in robot's memory
 def init_point(ser, name):
-    tools.send(ser, 'defp {}'.format(name))
-    tools.send(ser, 'here {}'.format(name))
+    serial_tools.send(ser, 'defp {}'.format(name))
+    serial_tools.send(ser, 'here {}'.format(name))
     return Point(name=name)
 
 
@@ -32,11 +32,11 @@ def get_point_coordinates(ser, point):
 # function that change the coordinates x,y,z,p,r of a position pos relatively to P0
 # '{}'.format(x) permet d'envoyer une valeur à la place de la variable au lieu d'un caractère
 def set_point_coordinates(ser, point, p0, x=None, y=None, z=None, p=None, r=None):
-    if x is not None: tools.send(ser, 'setpvc {} X {}'.format(point.name, p0.x + x))
-    if y is not None: tools.send(ser, 'setpvc {} Y {}'.format(point.name, p0.y + y))
-    if z is not None: tools.send(ser, 'setpvc {} Z {}'.format(point.name, p0.z + z))
-    if p is not None: tools.send(ser, 'setpvc {} P {}'.format(point.name, p0.p + p))
-    if r is not None: tools.send(ser, 'setpvc {} R {}'.format(point.name, p0.r + r))
+    if x is not None: serial_tools.send(ser, 'setpvc {} X {}'.format(point.name, p0.x + x))
+    if y is not None: serial_tools.send(ser, 'setpvc {} Y {}'.format(point.name, p0.y + y))
+    if z is not None: serial_tools.send(ser, 'setpvc {} Z {}'.format(point.name, p0.z + z))
+    if p is not None: serial_tools.send(ser, 'setpvc {} P {}'.format(point.name, p0.p + p))
+    if r is not None: serial_tools.send(ser, 'setpvc {} R {}'.format(point.name, p0.r + r))
 
 
 # function that move up and down pen at a given point relatively to P0
