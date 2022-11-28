@@ -1,4 +1,5 @@
 import numpy
+import re
 import serial_tools
 
 
@@ -24,10 +25,26 @@ def init_point(ser, name):
 
 
 # fills Point instance with robot memory data
-def get_point_coordinates(ser, point):
-    response = serial_tools.send(ser, 'listpv {}'.format(point.name))
-    # todo: parse response to fill point structure
+# todo: to be tested
+def get_point_coordinates(ser=None, point=None):
 
+    # get point info from robot
+    response = serial_tools.send(ser, 'listpv {}'.format(point.name))
+
+    # run regex to extract coordinates
+    regex = r"(?:X|Y|Z|P|R):.-?[0-9]*"
+    coordinates = re.finditer(regex, response, re.MULTILINE)
+
+    # fill Point structure
+    i = 0
+    for c in coordinates:
+        coord = c.group().split(":", 1)[1]
+        if i == 0:   point.x = coord
+        elif i == 1: point.y = coord
+        elif i == 2: point.z = coord
+        elif i == 3: point.p = coord
+        elif i == 4: point.r = coord
+        i += 1
 
 # function that change the coordinates x,y,z,p,r of a position pos relatively to P0
 # '{}'.format(x) permet d'envoyer une valeur à la place de la variable au lieu d'un caractère
