@@ -1,6 +1,7 @@
 import time
 import datetime
 import serial_tools
+import acquisition
 
 
 if __name__ == '__main__':
@@ -9,6 +10,7 @@ if __name__ == '__main__':
     if ser is not None:
         print('\n### BEGIN SEQUENCE ###')
         # Draw a flat square from given p0
+        serial_tools.send(ser, 'SPEED 20')
         serial_tools.send(ser, 'DIMP square[4]')
         serial_tools.send(ser, 'HERE square[1]')
         serial_tools.send(ser, 'HERE square[2]')
@@ -28,3 +30,4 @@ if __name__ == '__main__':
             serial_tools.send(ser, msg3)
 
         serial_tools.send(ser, 'MOVES square 1 4')
+

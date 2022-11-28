@@ -25,7 +25,7 @@ def init_point(ser, name):
 
 # fills Point instance with robot memory data
 def get_point_coordinates(ser, point):
-    response = tools.send(ser, 'listpv {}'.format(point.name))
+    response = serial_tools.send(ser, 'listpv {}'.format(point.name))
     # todo: parse response to fill point structure
 
 
@@ -45,7 +45,7 @@ def set_point_coordinates(ser, point, p0, x=None, y=None, z=None, p=None, r=None
 def moveup_pen(ser, p0, point, up):
     if up is True:
         set_point_coordinates(ser=ser, point=point, p0=p0, z=10)
-        tools.send(ser, 'move {}'.format(point.name))
+        serial_tools.send(ser, 'move {}'.format(point.name))
     else:
         set_point_coordinates(ser=ser, point=point, p0=p0, z=-10)
-        tools.send(ser, 'move {}'.format(point.name))
+        serial_tools.send(ser, 'move {}'.format(point.name))
