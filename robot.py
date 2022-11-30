@@ -4,8 +4,9 @@ import serial_tools
 
 
 class Point:
-    def __init__(self, name='point', x=0, y=0, z=0, p=0, r=0):
+    def __init__(self, name='point', ptype='robot', x=0, y=0, z=0, p=0, r=0):
         self.name = name
+        self.ptype = ptype
         self.x = x
         self.y = y
         self.z = z
@@ -13,7 +14,7 @@ class Point:
         self.r = r
 
     def print_point(self):
-        print('\n### POINT {} coordinates ###'.format(self.name))
+        print('\n### POINT {} coordinates (in {}) ###'.format(self.name, self.ptype))
         print('X={}  Y={}  Z={}  P={}  Z={}'.format(self.x, self.y, self.z, self.p, self.r))
 
 
