@@ -30,6 +30,15 @@ if __name__ == '__main__':
             serial_tools.send(ser, msg2)
             msg3 = 'HERE square[{}]'.format(i)
             serial_tools.send(ser, msg3)
-
-        serial_tools.send(ser, 'MOVES square 1 4')
+            serial_tools.send(ser, 'MOVES square 1 4')
+            
+#Creation of a table_points in order to try the function 
+#Z will be found thanks to P0 by hand
+pos_1= __init__(self, name='pos_1', ptype='robot', x=0, y=0, z=0, p=0, r=0)
+pos_2=__init__(self, name='pos_2', ptype='robot', x=200, y=0, z=0, p=0, r=0)
+pos_3=__init__(self, name='pos_1', ptype='robot', x=200, y=200, z=0, p=0, r=0)
+pos_4=__init__(self, name='pos_4', ptype='robot', x=0, y=200, z=0, p=0, r=0)
+table_points = [pos_1, pos_2, pos_3, pos_4]
+draw_vector(table_points,ser)
+move_vector(vector, ser)
 
