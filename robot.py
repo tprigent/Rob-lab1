@@ -67,3 +67,34 @@ def moveup_pen(ser, p0, point, up):
     else:
         set_point_coordinates(ser=ser, point=point, p0=p0, z=-10)
         serial_tools.send(ser, 'move {}'.format(point.name))
+        
+#function that convert keypoints into a table of points 
+import robot
+import serial_tools
+import acquisition
+
+def convert_keypoints(keypoints,):
+
+    return table_points 
+
+def draw_vector(table_points,vector,ser): 
+    dim=len(table_points)
+    serial_tools.send(ser, 'DIMP vector[{}}]'.format(dim))
+    for i in table_points+1:
+        serial_tools.send(ser, 'HERE vector[{}]'.format(i+1))
+        serial_tools.send(ser, 'SETPVC vector[{}] X {}'.format(i+1, table_points[i+1].x))
+        serial_tools.send(ser, 'SETPVC vector[{}] Y {}'.format(i+1, table_points[i+1].y))
+        serial_tools.send(ser, 'SETPVC vector[{}] Z {}'.format(i+1, table_points[i+1].z))
+        serial_tools.send(ser, 'SETPVC vector[{}] P {}'.format(i+1, table_points[i+1].p))
+        serial_tools.send(ser, 'SETPVC vector[{}] R {}'.format(i+1, table_points[i+1].r))
+
+#function that allows to move the robot along the vector of position "vector" from the position 1 to n
+def move_vector(vector, ser): 
+    n=serial_tools.send(ser, 'DIM vector')
+    for i in range(0,n-1):
+        serial_tools.send(ser, 'TEACH vector[{}]'.format(i+1))
+        serial_tools.send(ser, 'MOVE vector[{}]'.format(i+1))
+        serial_tools.send(ser, 'HERE vector[{}]'.format(i+1))
+    serial_tools.Send(ser, 'MOVE vector 1 {}'.format(n))
+
+        
