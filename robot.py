@@ -77,7 +77,7 @@ def convert_keypoints(keypoints,):
 
     return table_points 
 
-def draw_vector(table_points,vector,ser): 
+def draw_vector(table_points,ser): 
     dim=len(table_points)
     serial_tools.send(ser, 'DIMP vector[{}}]'.format(dim))
     for i in table_points+1:
