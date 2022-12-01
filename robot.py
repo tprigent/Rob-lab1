@@ -1,4 +1,3 @@
-import numpy
 import re
 import serial_tools
 
@@ -28,7 +27,6 @@ def init_point(ser, name):
 # fills Point instance with robot memory data
 # todo: to be tested
 def get_point_coordinates(ser=None, point=None):
-
     # get point info from robot
     response = serial_tools.send(ser, 'listpv {}'.format(point.name))
 
@@ -40,12 +38,29 @@ def get_point_coordinates(ser=None, point=None):
     i = 0
     for c in coordinates:
         coord = c.group().split(":", 1)[1]
-        if i == 0:   point.x = coord
-        elif i == 1: point.y = coord
-        elif i == 2: point.z = coord
-        elif i == 3: point.p = coord
-        elif i == 4: point.r = coord
+        if i == 0:
+            point.x = coord
+        elif i == 1:
+            point.y = coord
+        elif i == 2:
+            point.z = coord
+        elif i == 3:
+            point.p = coord
+        elif i == 4:
+            point.r = coord
         i += 1
+
+
+# convert point related to image frame to the robot frame relatively to p0
+# + add of r, p, and r coordinates info
+def imgf_to_robf(point, p0, img_width, img_height, scale):
+    point.x = (point.x / img_width) * scale + p0.x
+    point.y = (point.y / img_height) * scale + p0.x
+    point.z = p0.z
+    point.p = p0.p
+    point.r = p0.r
+    point.ptype = 'robot'
+
 
 # function that change the coordinates x,y,z,p,r of a position pos relatively to P0
 # '{}'.format(x) permet d'envoyer une valeur à la place de la variable au lieu d'un caractère
@@ -67,34 +82,30 @@ def moveup_pen(ser, p0, point, up):
     else:
         set_point_coordinates(ser=ser, point=point, p0=p0, z=-10)
         serial_tools.send(ser, 'move {}'.format(point.name))
-        
-#function that convert keypoints into a table of points 
-import robot
-import serial_tools
-import acquisition
 
-def convert_keypoints(keypoints,):
 
-    return table_points 
+# function that convert keypoints into a table of points
+def convert_keypoints(keypoints, ):
+    return 1
 
-def draw_vector(table_points,ser): 
-    dim=len(table_points)
+
+def draw_vector(table_points, ser):
+    dim = len(table_points)
     serial_tools.send(ser, 'DIMP vector[{}}]'.format(dim))
-    for i in table_points+1:
-        serial_tools.send(ser, 'HERE vector[{}]'.format(i+1))
-        serial_tools.send(ser, 'SETPVC vector[{}] X {}'.format(i+1, table_points[i+1].x))
-        serial_tools.send(ser, 'SETPVC vector[{}] Y {}'.format(i+1, table_points[i+1].y))
-        serial_tools.send(ser, 'SETPVC vector[{}] Z {}'.format(i+1, table_points[i+1].z))
-        serial_tools.send(ser, 'SETPVC vector[{}] P {}'.format(i+1, table_points[i+1].p))
-        serial_tools.send(ser, 'SETPVC vector[{}] R {}'.format(i+1, table_points[i+1].r))
+    for i in table_points + 1:
+        serial_tools.send(ser, 'HERE vector[{}]'.format(i + 1))
+        serial_tools.send(ser, 'SETPVC vector[{}] X {}'.format(i + 1, table_points[i + 1].x))
+        serial_tools.send(ser, 'SETPVC vector[{}] Y {}'.format(i + 1, table_points[i + 1].y))
+        serial_tools.send(ser, 'SETPVC vector[{}] Z {}'.format(i + 1, table_points[i + 1].z))
+        serial_tools.send(ser, 'SETPVC vector[{}] P {}'.format(i + 1, table_points[i + 1].p))
+        serial_tools.send(ser, 'SETPVC vector[{}] R {}'.format(i + 1, table_points[i + 1].r))
 
-#function that allows to move the robot along the vector of position "vector" from the position 1 to n
-def move_vector(vector, ser): 
-    n=serial_tools.send(ser, 'DIM vector')
-    for i in range(0,n-1):
-        serial_tools.send(ser, 'TEACH vector[{}]'.format(i+1))
-        serial_tools.send(ser, 'MOVE vector[{}]'.format(i+1))
-        serial_tools.send(ser, 'HERE vector[{}]'.format(i+1))
-    serial_tools.Send(ser, 'MOVE vector 1 {}'.format(n))
 
-        
+# function that allows to move the robot along the vector of position "vector" from the position 1 to n
+def move_vector(vector, ser):
+    n = serial_tools.send(ser, 'DIM vector')
+    for i in range(0, n - 1):
+        serial_tools.send(ser, 'TEACH vector[{}]'.format(i + 1))
+        serial_tools.send(ser, 'MOVE vector[{}]'.format(i + 1))
+        serial_tools.send(ser, 'HERE vector[{}]'.format(i + 1))
+    serial_tools.send(ser, 'MOVE vector 1 {}'.format(n))
