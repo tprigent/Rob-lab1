@@ -1,4 +1,5 @@
 import cv2
+from tqdm import tqdm
 import numpy as np
 
 
@@ -16,3 +17,68 @@ def get_key_points(image_name, nb_points):
     cv2.imwrite('output-images/keypoints-{}'.format(image_name), img_final)
 
     return keypoints
+
+
+def analyse_image(image_name):
+    # open image & convert to grayscale
+    image = cv2.imread('input-images/{}'.format(image_name))
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    ret, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+
+    # get image shape
+    width = thresh.shape[0]
+    height = thresh.shape[1]
+
+    # detect contours
+    contours, hierarchy = cv2.findContours(image=thresh, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_SIMPLE)
+
+    # store contour points
+    points = []
+    for contour in enumerate(contours):
+        data = contour[1]
+        for i in range(len(data) - 1):
+            #if i % 10 == 0:     # downsampling
+                points.append(data[i][0])
+
+    # draw resulting points on image
+    cont_image = np.zeros([width, height, 1])
+    cont_image.fill(255)
+
+    for i in range(len(points) - 1):
+        cont_image[points[i][1], points[i][0]] = 0
+        if i % 2000 == 0:
+            cv2.imwrite('output-images/keypoints-{}-{}'.format(i, image_name), cont_image)
+
+
+def vertical_analysis(image_name):
+    # open image & convert to grayscale
+    image = cv2.imread('input-images/{}'.format(image_name))
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray, 1, 100)
+    # get image shape
+    height = image.shape[0]
+    width = image.shape[1]
+
+    points0 = []
+
+    # draw resulting points on image
+    res_im0 = np.zeros([height, width, 1])
+    res_im0.fill(255)
+    res_im1 = np.zeros([height, width, 1])
+    res_im1.fill(255)
+
+    print('=> scanning lines')
+    for u in tqdm(range(1, height)):
+        for v in range(1, width):
+            if edges[u, v] == 255:
+                points0.append((u, v))
+
+    for i in range(1, len(points0)-1):
+        if points0[i][0] != points0[i+1][0]:
+            res_im0[points0[i][0], points0[i][1]] = 0
+        if points0[i-1][0] != points0[i][0]:
+            res_im1[points0[i][0], points0[i][1]] = 0
+
+    cv2.imwrite('output-images/keypoints-0-{}'.format(image_name), res_im0)
+    cv2.imwrite('output-images/keypoints-1-{}'.format(image_name), res_im1)
+
