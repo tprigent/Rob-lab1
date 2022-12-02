@@ -89,7 +89,7 @@ def convert_keypoints(keypoints, ):
     return 1
 
 
-def draw_vector(ser, table_points, vector_name):
+def record_vector(ser, table_points, vector_name):
     dim = len(table_points)
     serial_tools.send(ser, 'DIMP {}[{}}]'.format(vector_name, dim))
     for i in table_points + 1:
@@ -102,7 +102,7 @@ def draw_vector(ser, table_points, vector_name):
 
 
 # function that allows to move the robot along the vector of position "vector" from the position 1 to n
-def move_vector(ser, vector_vector):
+def draw_vector(ser, vector_name):
     n = serial_tools.send(ser, 'DIM {}'.format(vector_name))
     for i in range(0, n - 1):
         serial_tools.send(ser, 'TEACH {}[{}]'.format(vector_name, i+1))
