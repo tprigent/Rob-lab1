@@ -40,6 +40,7 @@ if __name__ == '__main__':
         pos_3 = robot.Point(name='pos_1', ptype='robot', x=200, y=200, z=0, p=0, r=0)
         pos_4 = robot.Point(name='pos_4', ptype='robot', x=0, y=200, z=0, p=0, r=0)
         table_points = [pos_1, pos_2, pos_3, pos_4]
-        robot.draw_vector(table_points, ser)
-        robot.move_vector(vector, ser)
+        vector_name = 'vector'
+        robot.draw_vector(ser, table_points, vector_name)
+        robot.move_vector(ser, vector_name)
 

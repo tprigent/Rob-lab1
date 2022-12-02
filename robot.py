@@ -89,23 +89,23 @@ def convert_keypoints(keypoints, ):
     return 1
 
 
-def draw_vector(table_points, ser):
+def draw_vector(ser, table_points, vector_name):
     dim = len(table_points)
-    serial_tools.send(ser, 'DIMP vector[{}}]'.format(dim))
+    serial_tools.send(ser, 'DIMP {}[{}}]'.format(vector_name, dim))
     for i in table_points + 1:
-        serial_tools.send(ser, 'HERE vector[{}]'.format(i + 1))
-        serial_tools.send(ser, 'SETPVC vector[{}] X {}'.format(i + 1, table_points[i + 1].x))
-        serial_tools.send(ser, 'SETPVC vector[{}] Y {}'.format(i + 1, table_points[i + 1].y))
-        serial_tools.send(ser, 'SETPVC vector[{}] Z {}'.format(i + 1, table_points[i + 1].z))
-        serial_tools.send(ser, 'SETPVC vector[{}] P {}'.format(i + 1, table_points[i + 1].p))
-        serial_tools.send(ser, 'SETPVC vector[{}] R {}'.format(i + 1, table_points[i + 1].r))
+        serial_tools.send(ser, 'HERE {}[{}]'.format(vector_name, i + 1))
+        serial_tools.send(ser, 'SETPVC {}[{}] X {}'.format(vector_name, i + 1, table_points[i + 1].x))
+        serial_tools.send(ser, 'SETPVC {}[{}] Y {}'.format(vector_name, i + 1, table_points[i + 1].y))
+        serial_tools.send(ser, 'SETPVC {}[{}] Z {}'.format(vector_name, i + 1, table_points[i + 1].z))
+        serial_tools.send(ser, 'SETPVC {}[{}] P {}'.format(vector_name, i + 1, table_points[i + 1].p))
+        serial_tools.send(ser, 'SETPVC {}[{}] R {}'.format(vector_name, i + 1, table_points[i + 1].r))
 
 
 # function that allows to move the robot along the vector of position "vector" from the position 1 to n
-def move_vector(vector, ser):
-    n = serial_tools.send(ser, 'DIM vector')
+def move_vector(ser, vector_vector):
+    n = serial_tools.send(ser, 'DIM {}'.format(vector_name))
     for i in range(0, n - 1):
-        serial_tools.send(ser, 'TEACH vector[{}]'.format(i + 1))
-        serial_tools.send(ser, 'MOVE vector[{}]'.format(i + 1))
-        serial_tools.send(ser, 'HERE vector[{}]'.format(i + 1))
-    serial_tools.send(ser, 'MOVE vector 1 {}'.format(n))
+        serial_tools.send(ser, 'TEACH {}[{}]'.format(vector_name, i+1))
+        serial_tools.send(ser, 'MOVE {}[{}]'.format(vector_name, i+1))
+        serial_tools.send(ser, 'HERE {}[{}]'.format(vector_name, i+1))
+    serial_tools.send(ser, 'MOVE {} 1 {}'.format(vector_name, n))
