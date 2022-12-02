@@ -94,14 +94,16 @@ def draw_vector(ser, table_points, vector_name):
     serial_tools.send(ser, 'DIMP {}[{}}]'.format(vector_name, dim))
     c=1
     for i in table_points + 1:
-        serial_tools.send(ser, 'HERE {}[{}]'.format(vector_name, c))
-        serial_tools.send(ser, 'SETPVC {}[{}] X {}'.format(vector_name, c, i.x))
-        serial_tools.send(ser, 'SETPVC {}[{}] Y {}'.format(vector_name, c, i.y))
-        serial_tools.send(ser, 'SETPVC {}[{}] Z {}'.format(vector_name, c, i.z))
-        serial_tools.send(ser, 'SETPVC {}[{}] P {}'.format(vector_name, c, i.p))
-        serial_tools.send(ser, 'SETPVC {}[{}] R {}'.format(vector_name, c, i.r))
-        c+=1
-
+        if i.ptype=='robot':
+            serial_tools.send(ser, 'HERE {}[{}]'.format(vector_name, c))
+            serial_tools.send(ser, 'SETPVC {}[{}] X {}'.format(vector_name, c, i.x))
+            serial_tools.send(ser, 'SETPVC {}[{}] Y {}'.format(vector_name, c, i.y))
+            serial_tools.send(ser, 'SETPVC {}[{}] Z {}'.format(vector_name, c, i.z))
+            serial_tools.send(ser, 'SETPVC {}[{}] P {}'.format(vector_name, c, i.p))
+            serial_tools.send(ser, 'SETPVC {}[{}] R {}'.format(vector_name, c, i.r))
+            c+=1
+        else: 
+            print('Convert the coordinates from the image') 
 
 # function that allows to move the robot along the vector of position "vector" from the position 1 to n
 def move_vector(ser, vector_vector):
