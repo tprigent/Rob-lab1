@@ -110,12 +110,30 @@ def processing(image_name):
     cnt = 0
 
     # overlay centroid on image + fill point list
-    points = []
+    points = np.zeros((1000, 3), dtype=np.uint8)
     for c in centroids:
-        if cnt != 0:    # avoid 1st centroid
-            points.append([int(c[1]), int(c[0])])
+        if cnt != 0:  # avoid 1st centroid
+            points[cnt][0] = int(c[1])
+            points[cnt][1] = int(c[0])
             img_final[int(c[1]) - 8: int(c[1]) + 16, int(c[0]) - 8: int(c[0]) + 16] = [0, 255, 0]
-        else: cnt += 1
+        cnt += 1
     # write final image
     cv2.imwrite('output-images/keypoints-{}'.format(image_name), img_final)
-    return points
+    return points, cnt
+
+
+def order_points(points, nb_points, img):
+    sorted_points = np.zeros((1000, 3), dtype=np.uint8)
+    contiguity_matrix = np.zeros((nb_points, nb_points), dtype=np.float)
+
+    for i in range(nb_points):
+        for j in range(nb_points):
+            contiguity_matrix[i][j] = \
+                pow(pow(points[i][1] - points[j][1], 2) + pow(points[i][1] - points[j][1], 2), 0.5)
+
+    for i in range(nb_points):
+        min_dist = 1000
+        for j in range(nb_points):
+            if contiguity_matrix[i][j] < min_dist and contiguity_matrix[i][j] != 0:
+                min_dist = contiguity_matrix[i][j]
+                print(i, j, min_dist)
