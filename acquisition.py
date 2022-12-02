@@ -118,3 +118,4 @@ def processing(image_name):
         else: cnt += 1
     # write final image
     cv2.imwrite('output-images/keypoints-{}'.format(image_name), img_final)
+    return centroids
