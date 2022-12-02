@@ -92,13 +92,15 @@ def convert_keypoints(keypoints, ):
 def draw_vector(ser, table_points, vector_name):
     dim = len(table_points)
     serial_tools.send(ser, 'DIMP {}[{}}]'.format(vector_name, dim))
+    c=1
     for i in table_points + 1:
-        serial_tools.send(ser, 'HERE {}[{}]'.format(vector_name, i + 1))
-        serial_tools.send(ser, 'SETPVC {}[{}] X {}'.format(vector_name, i + 1, table_points[i + 1].x))
-        serial_tools.send(ser, 'SETPVC {}[{}] Y {}'.format(vector_name, i + 1, table_points[i + 1].y))
-        serial_tools.send(ser, 'SETPVC {}[{}] Z {}'.format(vector_name, i + 1, table_points[i + 1].z))
-        serial_tools.send(ser, 'SETPVC {}[{}] P {}'.format(vector_name, i + 1, table_points[i + 1].p))
-        serial_tools.send(ser, 'SETPVC {}[{}] R {}'.format(vector_name, i + 1, table_points[i + 1].r))
+        serial_tools.send(ser, 'HERE {}[{}]'.format(vector_name, c))
+        serial_tools.send(ser, 'SETPVC {}[{}] X {}'.format(vector_name, c, i.x))
+        serial_tools.send(ser, 'SETPVC {}[{}] Y {}'.format(vector_name, c, i.y))
+        serial_tools.send(ser, 'SETPVC {}[{}] Z {}'.format(vector_name, c, i.z))
+        serial_tools.send(ser, 'SETPVC {}[{}] P {}'.format(vector_name, c, i.p))
+        serial_tools.send(ser, 'SETPVC {}[{}] R {}'.format(vector_name, c, i.r))
+        c+=1
 
 
 # function that allows to move the robot along the vector of position "vector" from the position 1 to n
