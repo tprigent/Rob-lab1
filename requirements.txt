@@ -2,3 +2,6 @@ numpy==1.23.5
 opencv-python==4.6.0.66
 
 pyserial~=3.5
+tqdm~=4.64.1
+sklearn~=0.0.post1
+scikit-learn~=1.1.3

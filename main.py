@@ -7,9 +7,11 @@ import acquisition
 
 
 if __name__ == '__main__':
-    points, nb_points = acquisition.processing('test_draw_1.png')
-    acquisition.order_points(points, nb_points)
-    # ser = serial_tools.connect_serial('COM3')
+    image_name = 'test_draw_1.png'
+    points, nb_points = acquisition.processing(image_name, 150)
+    acquisition.order_array(points, nb_points, 1, image_name)
+
+# ser = serial_tools.connect_serial('COM3')
     #
     # if ser is not None:
     #     print('\n### BEGIN SEQUENCE ###')

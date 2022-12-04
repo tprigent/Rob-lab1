@@ -1,5 +1,7 @@
 import cv2
 from tqdm import tqdm
+from sklearn.neighbors import NearestNeighbors
+import networkx as nx
 import numpy as np
 
 
@@ -19,71 +21,7 @@ def get_key_points(image_name, nb_points):
     return keypoints
 
 
-def analyse_image(image_name):
-    # open image & convert to grayscale
-    image = cv2.imread('input-images/{}'.format(image_name))
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    ret, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
-
-    # get image shape
-    width = thresh.shape[0]
-    height = thresh.shape[1]
-
-    # detect contours
-    contours, hierarchy = cv2.findContours(image=thresh, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_SIMPLE)
-
-    # store contour points
-    points = []
-    for contour in enumerate(contours):
-        data = contour[1]
-        for i in range(len(data) - 1):
-            # if i % 10 == 0:     # downsampling
-            points.append(data[i][0])
-
-    # draw resulting points on image
-    cont_image = np.zeros([width, height, 1])
-    cont_image.fill(255)
-
-    for i in range(len(points) - 1):
-        cont_image[points[i][1], points[i][0]] = 0
-        if i % 2000 == 0:
-            cv2.imwrite('output-images/keypoints-{}-{}'.format(i, image_name), cont_image)
-
-
-def vertical_analysis(image_name):
-    # open image & convert to grayscale
-    image = cv2.imread('input-images/{}'.format(image_name))
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray, 1, 100)
-    # get image shape
-    height = image.shape[0]
-    width = image.shape[1]
-
-    points0 = []
-
-    # draw resulting points on image
-    res_im0 = np.zeros([height, width, 1])
-    res_im0.fill(255)
-    res_im1 = np.zeros([height, width, 1])
-    res_im1.fill(255)
-
-    print('=> scanning lines')
-    for u in tqdm(range(1, height)):
-        for v in range(1, width):
-            if edges[u, v] == 255:
-                points0.append((u, v))
-
-    for i in range(1, len(points0) - 1):
-        if points0[i][0] != points0[i + 1][0]:
-            res_im0[points0[i][0], points0[i][1]] = 0
-        if points0[i - 1][0] != points0[i][0]:
-            res_im1[points0[i][0], points0[i][1]] = 0
-
-    cv2.imwrite('output-images/keypoints-0-{}'.format(image_name), res_im0)
-    cv2.imwrite('output-images/keypoints-1-{}'.format(image_name), res_im1)
-
-
-def processing(image_name):
+def processing(image_name, point_rate=200):
     img = cv2.imread('input-images/{}'.format(image_name))
 
     # get image shape
@@ -100,7 +38,7 @@ def processing(image_name):
     for u in tqdm(range(width)):
         for v in range(height):
             if u == 20 or v == 20: thresh[v, u] = 0
-            if u % 200 == 0 or v % 200 == 0: thresh[v, u] = 0
+            if u % point_rate == 0 or v % point_rate == 0: thresh[v, u] = 0
 
     # get centroids of fractions of drawing
     connectivity = 8
@@ -110,7 +48,7 @@ def processing(image_name):
     cnt = 0
 
     # overlay centroid on image + fill point list
-    points = np.zeros((1000, 3), dtype=np.uint8)
+    points = np.zeros((1000, 3), dtype=np.uint16)
     for c in centroids:
         if cnt != 0:  # avoid 1st centroid
             points[cnt][0] = int(c[1])
@@ -122,18 +60,43 @@ def processing(image_name):
     return points, cnt
 
 
-def order_points(points, nb_points, img):
-    sorted_points = np.zeros((1000, 3), dtype=np.uint8)
-    contiguity_matrix = np.zeros((nb_points, nb_points), dtype=np.float)
+def order_array(unordered_points, nb_points, generate_video=0, image_name=None):
+    points = unordered_points
+
+    clf = NearestNeighbors().fit(points)
+    G = clf.kneighbors_graph()
+    T = nx.from_scipy_sparse_matrix(G)
+
+    paths = [list(nx.dfs_preorder_nodes(T, i)) for i in range(nb_points)]
+
+    mindist = np.inf
+    minidx = 0
 
     for i in range(nb_points):
-        for j in range(nb_points):
-            contiguity_matrix[i][j] = \
-                pow(pow(points[i][1] - points[j][1], 2) + pow(points[i][1] - points[j][1], 2), 0.5)
+        p = paths[i]  # order of nodes
+        ordered = points[p]  # ordered nodes
+        # find cost of that order by the sum of euclidean distances between points (i) and (i+1)
+        cost = (((ordered[:-1] - ordered[1:]) ** 2).sum(1)).sum()
+        if cost < mindist:
+            mindist = cost
+            minidx = i
 
-    for i in range(nb_points):
-        min_dist = 1000
-        for j in range(nb_points):
-            if contiguity_matrix[i][j] < min_dist and contiguity_matrix[i][j] != 0:
-                min_dist = contiguity_matrix[i][j]
-                print(i, j, min_dist)
+    opt_order = paths[minidx]
+
+    x = unordered_points[opt_order, 0]
+    y = unordered_points[opt_order, 1]
+
+    if generate_video:
+        print('\n=> Generating video')
+
+        img = cv2.imread('input-images/{}'.format(image_name))
+        vid = cv2.VideoWriter('output-images/point-order.mp4', cv2.VideoWriter_fourcc('m', 'p', '4', 'v'),
+                              5, (img.shape[1], img.shape[0]))
+
+        for i in tqdm(range(nb_points)):
+            img[x[i] - 8: x[i] + 16, y[i] - 8: y[i] + 16] = [0, 0, 255]
+            vid.write(img)
+
+        vid.release()
+
+    return x, y
