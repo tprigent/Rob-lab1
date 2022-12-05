@@ -7,9 +7,17 @@ import acquisition
 
 
 if __name__ == '__main__':
-    image_name = 'test_draw_1.png'
-    acquisition.build_path(image_name, 200, 1)
+    image_name = 'test_draw_2.png'
+    width, height = acquisition.get_image_format(image_name)
+    p0 = robot.Point()
 
+    # image processing
+    keypoints = acquisition.build_path(image_name, 200, generate_video=0)
+
+    # point processing
+    vector = robot.get_key_point_vector(keypoints, p0, width, height, 1000)
+
+    print('ok')
 # ser = serial_tools.connect_serial('COM3')
     #
     # if ser is not None:

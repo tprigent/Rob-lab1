@@ -81,6 +81,8 @@ def build_path(image_name, point_rate, generate_video=0):
                 candidate = v
         ordered_points.append((unordered_points[candidate, 0], unordered_points[candidate, 1]))
         unordered_points[candidate, 2] = 1
+        if distance_matrix[i, candidate] > 300:
+            print('Step (', unordered_points[candidate, 0], unordered_points[candidate, 1], ') -> ', round(distance_matrix[i, candidate]))
         i = candidate
 
     # video generation (for infography)
@@ -99,4 +101,14 @@ def build_path(image_name, point_rate, generate_video=0):
             vid.write(img)
         vid.release()
 
-    return x, y
+    return ordered_points
+
+
+def get_image_format(image_name):
+    img = cv2.imread('input-images/{}'.format(image_name))
+
+    # get image shape
+    height = img.shape[0]
+    width = img.shape[1]
+
+    return width, height

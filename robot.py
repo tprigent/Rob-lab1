@@ -85,8 +85,13 @@ def moveup_pen(ser, p0, point, up):
 
 
 # function that convert keypoints into a table of points
-def convert_keypoints(keypoints, ):
-    return 1
+def get_key_point_vector(keypoints, p0, img_width, img_height, scale):
+    vector = []
+    for i in range(len(keypoints)):
+        p = Point('p{}'.format(i), x=keypoints[i][0], y=keypoints[i][1])
+        imgf_to_robf(p, p0, img_width, img_height, scale)
+        vector.append(p)
+    return vector
 
 
 def record_vector(ser, table_points, vector_name):
@@ -104,6 +109,7 @@ def record_vector(ser, table_points, vector_name):
             c+=1
         else: 
             print('Convert the coordinates from the image') 
+
 
 # function that allows to move the robot along the vector of position "vector" from the position 1 to n
 def draw_vector(ser, vector_name):
