@@ -1,7 +1,6 @@
 import cv2
 from tqdm import tqdm
-from sklearn.neighbors import NearestNeighbors
-import networkx as nx
+from scipy.spatial.distance import cdist
 import numpy as np
 
 
@@ -21,7 +20,7 @@ def get_key_points(image_name, nb_points):
     return keypoints
 
 
-def processing(image_name, point_rate=200):
+def get_keypoints(image_name, point_rate=200):
     img = cv2.imread('input-images/{}'.format(image_name))
 
     # get image shape
@@ -48,7 +47,7 @@ def processing(image_name, point_rate=200):
     cnt = 0
 
     # overlay centroid on image + fill point list
-    points = np.zeros((1000, 3), dtype=np.uint16)
+    points = np.zeros((len(centroids), 3), dtype=np.uint16)
     for c in centroids:
         if cnt != 0:  # avoid 1st centroid
             points[cnt][0] = int(c[1])
@@ -57,46 +56,47 @@ def processing(image_name, point_rate=200):
         cnt += 1
     # write final image
     cv2.imwrite('output-images/keypoints-{}'.format(image_name), img_final)
-    return points, cnt
+    return points
 
 
-def order_array(unordered_points, nb_points, generate_video=0, image_name=None):
-    points = unordered_points
+def build_path(image_name, point_rate, generate_video=0):
+    # get key points
+    unordered_points = get_keypoints(image_name, point_rate)
 
-    clf = NearestNeighbors().fit(points)
-    G = clf.kneighbors_graph()
-    T = nx.from_scipy_sparse_matrix(G)
+    # compute distance between each point
+    distance_matrix = cdist(unordered_points, unordered_points)
 
-    paths = [list(nx.dfs_preorder_nodes(T, i)) for i in range(nb_points)]
+    # set 1st point
+    ordered_points = [(unordered_points[0, 0], unordered_points[0, 1])]
+    unordered_points[0, 2] = 1
 
-    mindist = np.inf
-    minidx = 0
+    # iterate over all points
+    i = 0
+    for u in range(len(unordered_points)):        # repeat u times to process all elements
+        candidate = 0
+        min_dist = 10000
+        for v in range(len(unordered_points)):    # find the closest point to the previous one
+            if distance_matrix[i, v] < min_dist and distance_matrix[i, v] != 0 and unordered_points[v, 2] == 0:
+                min_dist = distance_matrix[i, v]
+                candidate = v
+        ordered_points.append((unordered_points[candidate, 0], unordered_points[candidate, 1]))
+        unordered_points[candidate, 2] = 1
+        i = candidate
 
-    for i in range(nb_points):
-        p = paths[i]  # order of nodes
-        ordered = points[p]  # ordered nodes
-        # find cost of that order by the sum of euclidean distances between points (i) and (i+1)
-        cost = (((ordered[:-1] - ordered[1:]) ** 2).sum(1)).sum()
-        if cost < mindist:
-            mindist = cost
-            minidx = i
-
-    opt_order = paths[minidx]
-
-    x = unordered_points[opt_order, 0]
-    y = unordered_points[opt_order, 1]
-
+    # video generation (for infography)
     if generate_video:
         print('\n=> Generating video')
 
+        # init video
         img = cv2.imread('input-images/{}'.format(image_name))
         vid = cv2.VideoWriter('output-images/point-order.mp4', cv2.VideoWriter_fourcc('m', 'p', '4', 'v'),
                               5, (img.shape[1], img.shape[0]))
 
-        for i in tqdm(range(nb_points)):
-            img[x[i] - 8: x[i] + 16, y[i] - 8: y[i] + 16] = [0, 0, 255]
+        # show points
+        for i in tqdm(range(len(unordered_points))):
+            x, y = ordered_points[i]
+            img[x - 8: x + 16, y - 8: y + 16] = [0, 0, 255]
             vid.write(img)
-
         vid.release()
 
     return x, y

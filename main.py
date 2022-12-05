@@ -8,8 +8,7 @@ import acquisition
 
 if __name__ == '__main__':
     image_name = 'test_draw_1.png'
-    points, nb_points = acquisition.processing(image_name, 150)
-    acquisition.order_array(points, nb_points, 1, image_name)
+    acquisition.build_path(image_name, 200, 1)
 
 # ser = serial_tools.connect_serial('COM3')
     #
