@@ -12,12 +12,13 @@ if __name__ == '__main__':
     p0 = robot.Point()
 
     # image processing
-    keypoints = acquisition.build_path(image_name, 200, generate_video=0)
+    keypoints = acquisition.build_path(image_name, 100, generate_video=0)
+
+    acquisition.split(keypoints, image_name)
 
     # point processing
     vector = robot.get_key_point_vector(keypoints, p0, width, height, 1000)
 
-    print('ok')
 # ser = serial_tools.connect_serial('COM3')
     #
     # if ser is not None:

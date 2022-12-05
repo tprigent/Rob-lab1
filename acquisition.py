@@ -79,7 +79,7 @@ def build_path(image_name, point_rate, generate_video=0):
             if distance_matrix[i, v] < min_dist and distance_matrix[i, v] != 0 and unordered_points[v, 2] == 0:
                 min_dist = distance_matrix[i, v]
                 candidate = v
-        ordered_points.append((unordered_points[candidate, 0], unordered_points[candidate, 1]))
+        ordered_points.append((int(unordered_points[candidate, 0]), int(unordered_points[candidate, 1])))
         unordered_points[candidate, 2] = 1
         if distance_matrix[i, candidate] > 300:
             print('Step (', unordered_points[candidate, 0], unordered_points[candidate, 1], ') -> ', round(distance_matrix[i, candidate]))
@@ -112,3 +112,26 @@ def get_image_format(image_name):
     width = img.shape[1]
 
     return width, height
+
+
+def split(keypoints, image_name):
+    points = []
+    slope_old = 0
+
+    for i in range(len(keypoints)-1):
+        x = keypoints[i][0]
+        y = keypoints[i][1]
+        x_next = keypoints[i+1][0]
+        y_next = keypoints[i+1][1]
+        th = 200
+
+        if abs(x_next - x) > 1 and x_next != 0:
+            slope = y_next-y / x_next-x
+            #print(abs(slope))
+            if abs(slope-slope_old) > th:
+                points.append((x, y))
+            slope_old = slope
+
+    print(len(keypoints))
+    print(len(points))
+
