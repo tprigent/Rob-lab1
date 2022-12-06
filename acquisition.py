@@ -59,7 +59,7 @@ def get_keypoints(image_name, point_rate=200):
     return points
 
 
-def build_path(image_name, point_rate, generate_video=0):
+def build_path(image_name, point_rate, gen_video=0):
     # get key points
     unordered_points = get_keypoints(image_name, point_rate)
 
@@ -86,20 +86,8 @@ def build_path(image_name, point_rate, generate_video=0):
         i = candidate
 
     # video generation (for infography)
-    if generate_video:
-        print('\n=> Generating video')
-
-        # init video
-        img = cv2.imread('input-images/{}'.format(image_name))
-        vid = cv2.VideoWriter('output-images/point-order.mp4', cv2.VideoWriter_fourcc('m', 'p', '4', 'v'),
-                              5, (img.shape[1], img.shape[0]))
-
-        # show points
-        for i in tqdm(range(len(unordered_points))):
-            x, y = ordered_points[i]
-            img[x - 8: x + 16, y - 8: y + 16] = [0, 0, 255]
-            vid.write(img)
-        vid.release()
+    if gen_video:
+        generate_video(unordered_points, image_name)
 
     return ordered_points
 
@@ -135,3 +123,16 @@ def split(keypoints, image_name):
     print(len(keypoints))
     print(len(points))
 
+
+def generate_video(points, image_name):
+    print('\n=> Generating video')
+
+    img = cv2.imread('input-images/{}'.format(image_name))
+    vid = cv2.VideoWriter('output-images/point-order.mp4', cv2.VideoWriter_fourcc('m', 'p', '4', 'v'),
+                          5, (img.shape[1], img.shape[0]))
+    for i in range(len(points)):
+        x, y = points[i]
+        img[x - 8: x + 16, y - 8: y + 16] = [0, 0, 255]
+        vid.write(img)
+
+    vid.release()
