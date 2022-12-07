@@ -1,33 +1,40 @@
-import time
-import datetime
-
 import robot
 import serial_tools
 import acquisition
 
 
 if __name__ == '__main__':
+
+    # define input image
     image_name = 'test_draw_1.png'
     width, height = acquisition.get_image_format(image_name)
-    p0 = robot.Point(x=200, y=5800, z=518, p=97845, r=120, ptype='robot')
 
     # image processing
+    print("\n### IMAGE PROCESSING ###")
     keypoints = acquisition.build_path(image_name, 100, gen_video=0)
 
-    #acquisition.split(keypoints, image_name)
+    # serial connect
+    ser = serial_tools.connect_serial('COM3')
+    if ser is None: exit(-1)
 
-    # point processing
+    # origin definition
+    print("\n### ORIGIN DEFINITION ###")
+    p0 = robot.Point()  # reference point
+    input("-> Please set robot to origin (and press enter)")
+
+    # point frame conversion
+    print("\n### POINT FRAME CONVERSION ###")
     vector = robot.get_key_point_vector(keypoints, p0, width, height, 1000)
-    print('ok')
+    robot.get_point_coordinates(ser, p0)
+    p0.print_point()
+    user_check = input("-> Is origin correct (y|n)")
+    if user_check.lower() != 'y': exit(-1)
 
+    # record vector in robot memory
+    print("\n### RECORDING POINTS IN ROBOT ###")
+    vector_name = 'path'
+    robot.record_vector(ser, vector, vector_name)
 
-    ser = serial_tools.connect_serial('COM6')
-    
-    if ser is not None:
-        robot.record_vector(ser, vector, 'test')
-
-    ser = serial_tools.connect_serial('COM6')
-    if ser is not None:
-        vector_name = 'vector'
-        robot.record_vector(ser, vector, vector_name)
-        robot.draw_vector(ser, vector_name)
+    # start drawing
+    print("\n### START DRAWING ###")
+    robot.draw_vector(ser, vector_name)

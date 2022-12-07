@@ -3,11 +3,11 @@ import time
 
 
 def connect_serial(serial_port, baudrate=9600):
-    print("### SERIAL CONNECTION ###")
+    print("\n### SERIAL CONNECTION ###")
     try:
         ser = serial.Serial(port=serial_port, baudrate=baudrate, bytesize=8, timeout=2, parity='N', xonxoff=0,
                             stopbits=1)
-        print("[Port]:   {0}\n[Status] connected".format(ser.name))
+        print("[Port]   {0}\n[Status] connected".format(ser.name))
         return ser
 
     except serial.SerialException:
@@ -42,4 +42,4 @@ def send(ser, msg):
     msg_to_send = msg + '\b'
     msg_bytes = bytes(msg_to_send, 'utf-8')
     ser.write(msg_bytes)
-    #return receive(ser, 2)
+    return receive(ser, 2)
