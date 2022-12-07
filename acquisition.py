@@ -87,7 +87,7 @@ def build_path(image_name, point_rate, gen_video=0):
 
     # video generation (for infography)
     if gen_video:
-        generate_video(unordered_points, image_name)
+        generate_video(ordered_points, image_name)
 
     return ordered_points
 
@@ -115,7 +115,6 @@ def split(keypoints, image_name):
 
         if abs(x_next - x) > 1 and x_next != 0:
             slope = y_next-y / x_next-x
-            #print(abs(slope))
             if abs(slope-slope_old) > th:
                 points.append((x, y))
             slope_old = slope
@@ -130,8 +129,8 @@ def generate_video(points, image_name):
     img = cv2.imread('input-images/{}'.format(image_name))
     vid = cv2.VideoWriter('output-images/point-order.mp4', cv2.VideoWriter_fourcc('m', 'p', '4', 'v'),
                           5, (img.shape[1], img.shape[0]))
-    for i in range(len(points)):
-        x, y = points[i]
+    for i in tqdm(range(len(points))):
+        x, y = points[i][0], points[i][1]
         img[x - 8: x + 16, y - 8: y + 16] = [0, 0, 255]
         vid.write(img)
 

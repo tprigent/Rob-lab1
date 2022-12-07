@@ -12,7 +12,7 @@ if __name__ == '__main__':
     p0 = robot.Point()
 
     # image processing
-    keypoints = acquisition.build_path(image_name, 100, generate_video=0)
+    keypoints = acquisition.build_path(image_name, 100, gen_video=0)
 
     acquisition.split(keypoints, image_name)
 
