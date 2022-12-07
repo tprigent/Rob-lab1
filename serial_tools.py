@@ -42,4 +42,4 @@ def send(ser, msg):
     msg_to_send = msg + '\b'
     msg_bytes = bytes(msg_to_send, 'utf-8')
     ser.write(msg_bytes)
-    return receive(ser, 2)
+    #return receive(ser, 2)

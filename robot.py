@@ -54,8 +54,8 @@ def get_point_coordinates(ser=None, point=None):
 # convert point related to image frame to the robot frame relatively to p0
 # + add of r, p, and r coordinates info
 def imgf_to_robf(point, p0, img_width, img_height, scale):
-    point.x = (point.x / img_width) * scale + p0.x
-    point.y = (point.y / img_height) * scale + p0.x
+    point.x = int((point.x / img_width) * scale + p0.x)
+    point.y = int((point.y / img_height) * scale + p0.x)
     point.z = p0.z
     point.p = p0.p
     point.r = p0.r
@@ -96,9 +96,9 @@ def get_key_point_vector(keypoints, p0, img_width, img_height, scale):
 
 def record_vector(ser, table_points, vector_name):
     dim = len(table_points)
-    serial_tools.send(ser, 'DIMP {}[{}}]'.format(vector_name, dim))
+    serial_tools.send(ser, 'DIMP {}[{}]'.format(vector_name, dim))
     c=1
-    for i in table_points + 1:
+    for i in table_points:
         if i.ptype=='robot':
             serial_tools.send(ser, 'HERE {}[{}]'.format(vector_name, c))
             serial_tools.send(ser, 'SETPVC {}[{}] X {}'.format(vector_name, c, i.x))
@@ -119,3 +119,12 @@ def draw_vector(ser, vector_name):
         serial_tools.send(ser, 'MOVE {}[{}]'.format(vector_name, i+1))
         serial_tools.send(ser, 'HERE {}[{}]'.format(vector_name, i+1))
     serial_tools.send(ser, 'MOVE {} 1 {}'.format(vector_name, n))
+
+#function that allows to move the robot along the vector of position "vector" from the position 1 to n with a circular move
+def draw_circ_vector(ser, vector_name):
+    n = serial_tools.send(ser, 'DIM {}'.format(vector_name))
+    for i in range(0, n - 1):
+        serial_tools.send(ser, 'TEACH {}[{}]'.format(vector_name, i+1))
+        serial_tools.send(ser, 'MOVEC {}[{}]'.format(vector_name, i+1))
+        serial_tools.send(ser, 'HERE {}[{}]'.format(vector_name, i+1))
+    serial_tools.send(ser, 'MOVEC {} 1 {}'.format(vector_name, n))
