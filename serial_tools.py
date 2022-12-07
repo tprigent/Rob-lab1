@@ -37,7 +37,9 @@ def receive(ser, timeout):
     return output
 
 
-def send(ser, msg):
+def send(ser, msg, ask=0):
+    if ask:
+        input('-> Ready to continue ? (press enter)')
     print('<<< ' + msg)
     msg_to_send = msg + '\b'
     msg_bytes = bytes(msg_to_send, 'utf-8')
