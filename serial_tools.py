@@ -1,9 +1,11 @@
 import serial
 import time
 
+import tools
+
 
 def connect_serial(serial_port, baudrate=9600):
-    print("\n### SERIAL CONNECTION ###")
+    tools.print_title("\n### SERIAL CONNECTION ###")
     try:
         ser = serial.Serial(port=serial_port, baudrate=baudrate, bytesize=8, timeout=2, parity='N', xonxoff=0,
                             stopbits=1)
@@ -15,33 +17,28 @@ def connect_serial(serial_port, baudrate=9600):
         return None
 
 
-def receive(ser, timeout):
-    output = ""
-    flag = True
+def receive(ser):
+    output = "No answer."
     start_time = time.time()
-    while flag:
-        # Wait until there is data waiting in the serial buffer
-        if ser.in_waiting > 0:
-            # Read data out of the buffer until a carriage return / new line is found
+    curr_time = time.time()
+
+    while curr_time-start_time < 1:                 # wait timeout (in s)
+        if ser.in_waiting > 0:                      # check for data on serial port
             ser_string = ser.readline()
-            # Print the contents of the serial data
-            try:
-                output = ser_string.decode("Ascii")
-                print('>>> ' + ser_string.decode("Ascii"))
-            except:
-                pass
-            else:
-                deltat = time.time() - start_time
-                if deltat > timeout:
-                    flag = False
+            output = ser_string.decode("Ascii")
+
+        curr_time = time.time()
+
+    tools.print_robot_receive('>>> ' + output)
     return output
 
 
 def send(ser, msg, ask=0):
     if ask:
         input('-> Ready to continue ? (press enter)')
-    print('<<< ' + msg)
+    tools.print_robot_send('<<< ' + msg)
     msg_to_send = msg + '\b'
     msg_bytes = bytes(msg_to_send, 'utf-8')
     ser.write(msg_bytes)
-    return receive(ser, 2)
+    answer = receive(ser)
+    return answer

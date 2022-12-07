@@ -1,5 +1,6 @@
 import re
 import serial_tools
+import tools
 
 
 class Point:
@@ -13,7 +14,7 @@ class Point:
         self.r = r
 
     def print(self):
-        print('\n### POINT {} coordinates (in {}) ###'.format(self.name, self.ptype))
+        tools.print_title('\n### POINT {} coordinates (in {}) ###'.format(self.name, self.ptype))
         print('X={}  Y={}  Z={}  P={}  Z={}'.format(self.x, self.y, self.z, self.p, self.r))
 
 
@@ -23,7 +24,7 @@ class Vector:
         self.points = points
 
     def print(self):
-        print('\n### VECTOR {} ###'.format(self.name))
+        tools.print_title('\n### VECTOR {} ###'.format(self.name))
         for i in range(len(self.points)):
             pt = self.points[i]
             print('[{}] {} X={}  Y={}  Z={}  P={}  Z={}'.format(i, pt.name, pt.x, pt.y, pt.z, pt.p, pt.z))
