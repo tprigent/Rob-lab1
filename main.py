@@ -7,52 +7,19 @@ import acquisition
 
 
 if __name__ == '__main__':
-    image_name = 'test_draw_2.png'
+    image_name = 'test_draw_1.png'
     width, height = acquisition.get_image_format(image_name)
     p0 = robot.Point()
 
     # image processing
     keypoints = acquisition.build_path(image_name, 100, gen_video=0)
-
     acquisition.split(keypoints, image_name)
 
     # point processing
     vector = robot.get_key_point_vector(keypoints, p0, width, height, 1000)
 
-# ser = serial_tools.connect_serial('COM3')
-    #
-    # if ser is not None:
-    #     print('\n### BEGIN SEQUENCE ###')
-    #     # Draw a flat square from given p0
-    #     serial_tools.send(ser, 'SPEED 20')
-    #     serial_tools.send(ser, 'DIMP square[4]')
-    #     serial_tools.send(ser, 'HERE square[1]')
-    #     serial_tools.send(ser, 'HERE square[2]')
-    #     serial_tools.send(ser, 'SETPVC square[2] X 200')
-    #     serial_tools.send(ser, 'HERE square[3]')
-    #     serial_tools.send(ser, 'SETPVC square[2] Y 300')
-    #     serial_tools.send(ser, 'HERE square[4]')
-    #     serial_tools.send(ser, 'SETPVC square[4] X 200')
-    #     serial_tools.send(ser, 'SETPVC square[4] Y 300')
-    #
-    #     for i in range(4):
-    #         msg1 = 'TEACH square[{}]'.format(i)
-    #         serial_tools.send(ser, msg1)
-    #         msg2 = 'MOVE square[{}]'.format(i)
-    #         serial_tools.send(ser, msg2)
-    #         msg3 = 'HERE square[{}]'.format(i)
-    #         serial_tools.send(ser, msg3)
-    #
-    #     serial_tools.send(ser, 'MOVES square 1 4')
-    #
-    #     #Creation of a table_points in order to try the function
-    #     #Z will be found thanks to P0 by hand
-    #     pos_1 = robot.Point(name='pos_1', ptype='robot', x=0, y=0, z=0, p=0, r=0)
-    #     pos_2 = robot.Point(name='pos_2', ptype='robot', x=200, y=0, z=0, p=0, r=0)
-    #     pos_3 = robot.Point(name='pos_1', ptype='robot', x=200, y=200, z=0, p=0, r=0)
-    #     pos_4 = robot.Point(name='pos_4', ptype='robot', x=0, y=200, z=0, p=0, r=0)
-    #     table_points = [pos_1, pos_2, pos_3, pos_4]
-    #     vector_name = 'vector'
-    #     robot.record_vector(ser, table_points, vector_name)
-    #     robot.draw_vector(ser, vector_name)
-    #
+    ser = serial_tools.connect_serial('COM6')
+    if ser is not None:
+        vector_name = 'vector'
+        robot.record_vector(ser, vector, vector_name)
+        robot.draw_vector(ser, vector_name)

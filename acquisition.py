@@ -59,9 +59,9 @@ def get_keypoints(image_name, point_rate=200):
     return points
 
 
-def build_path(image_name, point_rate, gen_video=0):
+def build_path(image_name, downsample, gen_video=0):
     # get key points
-    unordered_points = get_keypoints(image_name, point_rate)
+    unordered_points = get_keypoints(image_name, 50)
 
     # compute distance between each point
     distance_matrix = cdist(unordered_points, unordered_points)
@@ -79,7 +79,8 @@ def build_path(image_name, point_rate, gen_video=0):
             if distance_matrix[i, v] < min_dist and distance_matrix[i, v] != 0 and unordered_points[v, 2] == 0:
                 min_dist = distance_matrix[i, v]
                 candidate = v
-        ordered_points.append((int(unordered_points[candidate, 0]), int(unordered_points[candidate, 1])))
+        if u%downsample == 0:
+            ordered_points.append((int(unordered_points[candidate, 0]), int(unordered_points[candidate, 1])))
         unordered_points[candidate, 2] = 1
         if distance_matrix[i, candidate] > 300:
             print('Step (', unordered_points[candidate, 0], unordered_points[candidate, 1], ') -> ', round(distance_matrix[i, candidate]))
@@ -111,16 +112,18 @@ def split(keypoints, image_name):
         y = keypoints[i][1]
         x_next = keypoints[i+1][0]
         y_next = keypoints[i+1][1]
-        th = 200
+        th = 2
 
-        if abs(x_next - x) > 1 and x_next != 0:
+        if abs(x_next - x) > 0.1 and x_next != 0:
             slope = y_next-y / x_next-x
-            if abs(slope-slope_old) > th:
+            if abs(slope-slope_old) < th:
                 points.append((x, y))
+                points.append((x_next, y_next))
             slope_old = slope
 
     print(len(keypoints))
     print(len(points))
+    generate_video(points, image_name)
 
 
 def generate_video(points, image_name):
