@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     # define serial port name
     if platform.system() == 'Darwin':
-        serial_port = '/dev/cu.Bluetooth-Incoming-Port'     # macOS
+        serial_port = '/dev/ttys005'     # macOS
     else:
         serial_port = "COM3"                                # Windows
 

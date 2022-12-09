@@ -37,8 +37,8 @@ def send(ser, msg, ask=0):
     if ask:
         input('-> Ready to continue ? (press enter)')
     tools.print_robot_send('<<< ' + msg)
-    msg_to_send = msg + '\b'
-    msg_bytes = bytes(msg_to_send, 'utf-8')
+    msg_to_send = msg + '\r'
+    msg_bytes = msg_to_send.encode('ASCII')
     ser.write(msg_bytes)
     answer = receive(ser)
     return answer
