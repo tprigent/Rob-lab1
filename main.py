@@ -27,12 +27,12 @@ if __name__ == '__main__':
     if ser is None: exit(-1)
 
     # origin definition
-    tools.print_title("\n### ORIGIN DEFINITION ###")
+    tools.print_title("### ORIGIN DEFINITION ###")
     p0 = robot.Point(name='p0')  # reference point
     input("-> Please set robot to origin (and press enter) ")
 
     # point frame conversion
-    tools.print_title("\n### POINT FRAME CONVERSION ###")
+    tools.print_title("### POINT FRAME CONVERSION ###")
     robot.get_point_coordinates(ser, p0)
     v = robot.get_vector_from_keypoints(keypoints, p0, width, height, 1000)
     p0.print()
@@ -40,9 +40,9 @@ if __name__ == '__main__':
     if user_check.lower() != 'y': exit(-1)
 
     # record vector in robot memory
-    tools.print_title("\n### RECORDING POINTS IN ROBOT ###")
+    tools.print_title("### RECORDING POINTS IN ROBOT ###")
     robot.record_vector(ser, v)
 
     # start drawing
-    tools.print_title("\n### START DRAWING ###")
+    tools.print_title("### START DRAWING ###")
     robot.draw_vector(ser, v)

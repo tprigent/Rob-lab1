@@ -1,11 +1,10 @@
 import serial
 import time
-
 import tools
 
 
 def connect_serial(serial_port, baudrate=9600):
-    tools.print_title("\n### SERIAL CONNECTION ###")
+    tools.print_title("### SERIAL CONNECTION ###")
     try:
         ser = serial.Serial(port=serial_port, baudrate=baudrate, bytesize=8, timeout=2, parity='N', xonxoff=0,
                             stopbits=1)

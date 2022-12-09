@@ -1,3 +1,23 @@
-def print_title(text): print('\u001b[32m {}\u001b[0m'.format(text))
-def print_robot_send(text): print('\u001b[36;1m {}\u001b[0m'.format(text))
-def print_robot_receive(text): print('\u001b[34;1m {}\u001b[0m'.format(text))
+import datetime
+
+
+def print_title(text):
+    print('\u001b[32m \n{}\u001b[0m'.format(text))
+    log(text)
+
+
+def print_robot_send(text):
+    print('\u001b[36;1m {}\u001b[0m'.format(text))
+    log(text)
+
+
+def print_robot_receive(text):
+    print('\u001b[34;1m {}\u001b[0m'.format(text))
+    log(text)
+
+
+def log(msg):
+    f_log = open('history.log', 'a+')
+    timestamp = datetime.datetime.now()
+    log_text = '{}: {}\n'.format(timestamp, msg)
+    f_log.write(log_text)
