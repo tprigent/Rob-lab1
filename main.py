@@ -10,9 +10,18 @@ if __name__ == '__main__':
 
     # define serial port name
     if platform.system() == 'Darwin':
-        serial_port = '/dev/ttys005'     # macOS
+        serial_port = '/dev/ttys002'     # macOS
     else:
-        serial_port = "COM3"                                # Windows
+        serial_port = "COM3"             # Windows
+
+    # serial connect
+    ser = serial_tools.connect_serial(serial_port)
+    if ser is None: exit(-1)
+
+    # home
+    tools.print_title("### HOME ROBOT ###")
+    home = input("-> Do you want to set robot to home position ? (y|n) ")
+    if home.lower() == 'y': serial_tools.send(ser, 'home')
 
     # define input image
     image_name = 'test_draw_1.png'
@@ -20,11 +29,7 @@ if __name__ == '__main__':
 
     # image processing
     tools.print_title("### IMAGE PROCESSING ###")
-    keypoints = acquisition.build_path(image_name, 100, gen_video=0)
-
-    # serial connect
-    ser = serial_tools.connect_serial(serial_port)
-    if ser is None: exit(-1)
+    keypoints = acquisition.build_path(image_name, downsample=15, gen_video=0)
 
     # origin definition
     tools.print_title("### ORIGIN DEFINITION ###")
@@ -36,7 +41,7 @@ if __name__ == '__main__':
     robot.get_point_coordinates(ser, p0)
     v = robot.get_vector_from_keypoints(keypoints, p0, width, height, 1000)
     p0.print()
-    user_check = input("-> Is origin correct (y|n) ")
+    user_check = input("-> Is origin correct ? (y|n) ")
     if user_check.lower() != 'y': exit(-1)
 
     # record vector in robot memory

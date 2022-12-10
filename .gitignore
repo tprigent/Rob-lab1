@@ -2,4 +2,4 @@
 __pycache__
 output-images
 *.DS_Store
-history.log
+*.log
