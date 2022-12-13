@@ -112,16 +112,16 @@ def get_lines(image_name, print_lines):
 
     l = []
     for i in np.array([1, 15, 30, 60, 90]):
-        lines = cv2.HoughLinesP(dilation, 1, np.pi / i, 800, 50, 1)
+        lines = cv2.HoughLinesP(dilation, 1, np.pi / i, 800, 60, 4)
         if lines is not None:
             x1, y1, x2, y2 = lines[0][0]
-            cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 20)
+            cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 10)
             cv2.circle(img, (int(x1), int(y1)), radius=1, color=(0, 0, 255), thickness=30)
             cv2.circle(img, (int(x2), int(y2)), radius=1, color=(0, 0, 255), thickness=30)
             l.append((x1, y1, x2, y2))
 
     if print_lines:
-        cv2.imwrite('output-images/hough.png'.format(image_name), img)
+        cv2.imwrite('output-images/lines.png'.format(image_name), img)
 
 
 def generate_video(points, image_name):
