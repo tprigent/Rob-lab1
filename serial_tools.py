@@ -17,18 +17,24 @@ def connect_serial(serial_port, baudrate=9600):
 
 
 def receive(ser):
-    output = "No answer."
+    response_incoming = 0           # flag for data incoming
+    output = ''                     # prepare response buffer
     start_time = time.time()
     curr_time = time.time()
 
     while curr_time-start_time < 1:                 # wait timeout (in s)
         if ser.in_waiting > 0:                      # check for data on serial port
+            response_incoming = 1
             ser_string = ser.readline()
-            output = ser_string.decode("Ascii")
-
+            readbuf = ser_string.decode("Ascii")
+            output += readbuf                       # add read line to response buffer
         curr_time = time.time()
 
-    tools.print_robot_receive('>>> ' + output)
+    if response_incoming == 0:      # if no answer has been received within timeout
+        output = 'No answer.'
+
+    tools.print_robot_receive('>>> ' + output)      # final print
+
     return output
 
 
