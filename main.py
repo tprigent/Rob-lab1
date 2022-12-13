@@ -16,21 +16,20 @@ if __name__ == '__main__':
 
     # serial connect
     ser = serial_tools.connect_serial(serial_port)
-    #if ser is None: exit(-1)
+    if ser is None: exit(-1)
 
     # home
     tools.print_title("### HOME ROBOT ###")
-    #home = input("-> Do you want to set robot to home position ? (y|n) ")
-    #if home.lower() == 'y': serial_tools.send(ser, 'home')
+    home = input("-> Do you want to set robot to home position ? (y|n) ")
+    if home.lower() == 'y': serial_tools.send(ser, 'home')
 
     # define input image
-    image_name = 'test_draw_2.png'
+    image_name = 'test_draw_1.png'
     width, height = acquisition.get_image_format(image_name)
 
     # image processing
     tools.print_title("### IMAGE PROCESSING ###")
-    #keypoints = acquisition.build_path(image_name, downsample=1, gen_video=0)
-    acquisition.get_lines(image_name)
+    keypoints = acquisition.build_path(image_name, downsample=1, gen_video=0)
 
     # origin definition
     tools.print_title("### ORIGIN DEFINITION ###")

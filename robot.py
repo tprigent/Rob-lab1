@@ -114,12 +114,14 @@ def record_vector(ser, vector):
     c = 1
     for i in vector.points:
         if i.ptype == 'robot':
+            serial_tools.send(ser, 'TEACH {}[{}]'.format(vector.name, c))
+            serial_tools.send(ser, '{}'.format(i.x))
+            serial_tools.send(ser, '{}'.format(i.y))
+            serial_tools.send(ser, '{}'.format(i.z))
+            serial_tools.send(ser, '{}'.format(i.p))
+            serial_tools.send(ser, '{}'.format(i.r))
+            serial_tools.send(ser, 'MOVE {}[{}]'.format(vector.name, c))
             serial_tools.send(ser, 'HERE {}[{}]'.format(vector.name, c))
-            serial_tools.send(ser, 'SETPVC {}[{}] X {}'.format(vector.name, c, i.x))
-            serial_tools.send(ser, 'SETPVC {}[{}] Y {}'.format(vector.name, c, i.y))
-            serial_tools.send(ser, 'SETPVC {}[{}] Z {}'.format(vector.name, c, i.z))
-            serial_tools.send(ser, 'SETPVC {}[{}] P {}'.format(vector.name, c, i.p))
-            serial_tools.send(ser, 'SETPVC {}[{}] R {}'.format(vector.name, c, i.r))
             c += 1
         else:
             print('Error: points still in the image frame')
@@ -129,11 +131,7 @@ def record_vector(ser, vector):
 # function that allows to move the robot along the vector of position "vector" from the position 1 to n
 def draw_vector(ser, vector):
     n = len(vector.points)
-    for i in range(n):
-        serial_tools.send(ser, 'TEACH {}[{}]'.format(vector.name, i+1))
-        serial_tools.send(ser, 'MOVE {}[{}]'.format(vector.name, i+1))
-        serial_tools.send(ser, 'HERE {}[{}]'.format(vector.name, i+1))
-    serial_tools.send(ser, 'MOVE {} 1 {}'.format(vector.name, n))
+    serial_tools.send(ser, 'MOVES {} 1 {}'.format(vector.name, n))
 
 
 # function that allows to move the robot along the vector of position "vector" from the position 1 to n with a
