@@ -1,7 +1,7 @@
 import cv2
 from tqdm import tqdm
 from scipy.spatial.distance import cdist
-import matplotlib.pyplot as plt
+import math
 import numpy as np
 
 
@@ -104,16 +104,67 @@ def get_image_format(image_name):
     return width, height
 
 
+def get_lines(image_name):
+    img = cv2.imread('input-images/{}'.format(image_name))
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+    dilation = cv2.dilate(edges, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)), iterations=5)
+    cv2.imwrite('output-images/edges.png'.format(image_name), dilation)
+    lines = cv2.HoughLinesP(dilation, 1, np.pi / 180, 800, 50, 1)
+    l = []
+    prev_angle = 0
+    for i in range(len(lines)):
+        for x1, y1, x2, y2 in lines[i]:
+            a = angle((x1, y1, x2, y2))
+            if abs(prev_angle-a) > 15:
+                l.append((x1, y1, x2, y2))
+                prev_angle = a
+            cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 20)
+
+    lines = cv2.HoughLinesP(dilation, 1, np.pi, 800, 5, 1)
+    for i in range(len(lines)):
+        for x1, y1, x2, y2 in lines[i]:
+            a = angle((x1, y1, x2, y2))
+            print(abs(prev_angle - a))
+            if abs(prev_angle - a) > 15:
+                l.append((x1, y1, x2, y2))
+                prev_angle = a
+            cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 20)
+
+    select_lines(l, image_name)
+    cv2.imwrite('output-images/hough.png'.format(image_name), img)
+
+
+def select_lines(lines, image_name):
+    img = cv2.imread('input-images/{}'.format(image_name))
+    lines.sort(key=norm, reverse=True)
+
+    for i in range(20):
+        cv2.line(img, (lines[i][0], lines[i][1]), (lines[i][2], lines[i][3]), (0, 255, 0), 20)
+
+    cv2.imwrite('output-images/biggest.png'.format(image_name), img)
+
+    print('ok')
+
+
+def norm(vect):
+    return math.sqrt((vect[0]-vect[2])**2 + (vect[1]-vect[3])**2)
+
+
+def angle(vect):
+    return math.atan2(vect[1]-vect[3], vect[0]-vect[2]) * 180 / np.pi
+
+
 def split(keypoints, image_name):
     points = []
     slope_old = 0
     cnt = 0
 
-    for i in range(len(keypoints)-5):
+    for i in range(len(keypoints)-1):
         x = keypoints[i][0]
         y = keypoints[i][1]
-        x_next = keypoints[i+5][0]
-        y_next = keypoints[i+5][1]
+        x_next = keypoints[i+1][0]
+        y_next = keypoints[i+1][1]
         th = 0.5
 
         slope = compute_slope(x, y, x_next, y_next)
@@ -151,8 +202,6 @@ def get_extreme(points, image_name):
             cv2.line(img, (int(y1), int(x1)), (int(y2), int(x2)), (0, 255, 0), 10)
             cv2.circle(img, (int(y1), int(x1)), radius=1, color=(0, 0, 255), thickness=20)
             cv2.circle(img, (int(y2), int(x2)), radius=1, color=(0, 0, 255), thickness=20)
-
-
 
     cv2.imwrite('output-images/lines.png'.format(image_name), img)
 

@@ -24,13 +24,13 @@ if __name__ == '__main__':
     #if home.lower() == 'y': serial_tools.send(ser, 'home')
 
     # define input image
-    image_name = 'test_draw_1.png'
+    image_name = 'test_draw_2.png'
     width, height = acquisition.get_image_format(image_name)
 
     # image processing
     tools.print_title("### IMAGE PROCESSING ###")
-    keypoints = acquisition.build_path(image_name, downsample=1, gen_video=0)
-    acquisition.split(keypoints, image_name)
+    #keypoints = acquisition.build_path(image_name, downsample=1, gen_video=0)
+    acquisition.get_lines(image_name)
 
     # origin definition
     tools.print_title("### ORIGIN DEFINITION ###")
