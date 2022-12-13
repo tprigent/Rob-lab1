@@ -1,7 +1,6 @@
 import cv2
 from tqdm import tqdm
 from scipy.spatial.distance import cdist
-import math
 import numpy as np
 
 
@@ -104,112 +103,25 @@ def get_image_format(image_name):
     return width, height
 
 
-def get_lines(image_name):
+def get_lines(image_name, print_lines):
     img = cv2.imread('input-images/{}'.format(image_name))
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150, apertureSize=3)
-    dilation = cv2.dilate(edges, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)), iterations=5)
+    dilation = cv2.dilate(edges, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5)), iterations=5)
     cv2.imwrite('output-images/edges.png'.format(image_name), dilation)
-    lines = cv2.HoughLinesP(dilation, 1, np.pi / 180, 800, 50, 1)
+
     l = []
-    prev_angle = 0
-    for i in range(len(lines)):
-        for x1, y1, x2, y2 in lines[i]:
-            a = angle((x1, y1, x2, y2))
-            if abs(prev_angle-a) > 15:
-                l.append((x1, y1, x2, y2))
-                prev_angle = a
+    for i in np.array([1, 15, 30, 60, 90]):
+        lines = cv2.HoughLinesP(dilation, 1, np.pi / i, 800, 50, 1)
+        if lines is not None:
+            x1, y1, x2, y2 = lines[0][0]
             cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 20)
+            cv2.circle(img, (int(x1), int(y1)), radius=1, color=(0, 0, 255), thickness=30)
+            cv2.circle(img, (int(x2), int(y2)), radius=1, color=(0, 0, 255), thickness=30)
+            l.append((x1, y1, x2, y2))
 
-    lines = cv2.HoughLinesP(dilation, 1, np.pi, 800, 5, 1)
-    for i in range(len(lines)):
-        for x1, y1, x2, y2 in lines[i]:
-            a = angle((x1, y1, x2, y2))
-            print(abs(prev_angle - a))
-            if abs(prev_angle - a) > 15:
-                l.append((x1, y1, x2, y2))
-                prev_angle = a
-            cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 20)
-
-    select_lines(l, image_name)
-    cv2.imwrite('output-images/hough.png'.format(image_name), img)
-
-
-def select_lines(lines, image_name):
-    img = cv2.imread('input-images/{}'.format(image_name))
-    lines.sort(key=norm, reverse=True)
-
-    for i in range(20):
-        cv2.line(img, (lines[i][0], lines[i][1]), (lines[i][2], lines[i][3]), (0, 255, 0), 20)
-
-    cv2.imwrite('output-images/biggest.png'.format(image_name), img)
-
-    print('ok')
-
-
-def norm(vect):
-    return math.sqrt((vect[0]-vect[2])**2 + (vect[1]-vect[3])**2)
-
-
-def angle(vect):
-    return math.atan2(vect[1]-vect[3], vect[0]-vect[2]) * 180 / np.pi
-
-
-def split(keypoints, image_name):
-    points = []
-    slope_old = 0
-    cnt = 0
-
-    for i in range(len(keypoints)-1):
-        x = keypoints[i][0]
-        y = keypoints[i][1]
-        x_next = keypoints[i+1][0]
-        y_next = keypoints[i+1][1]
-        th = 0.5
-
-        slope = compute_slope(x, y, x_next, y_next)
-        if slope != -1:
-            if abs((abs(slope)-abs(slope_old))) > th or slope*slope_old < 0:
-                cnt += 1
-            points.append((x, y, cnt))
-            slope_old = slope
-
-    print(len(keypoints))
-    print(len(points))
-    get_extreme(points, image_name)
-    generate_video(points, image_name)
-
-
-def get_extreme(points, image_name):
-    img = cv2.imread('input-images/{}'.format(image_name))
-    limits = []
-
-    for i in range(len(points)-1):
-        x1, y1, t1 = points[i]
-        x2, y2, t2 = points[i+1]
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(img, str(t1), (y1 + 30, x1 + 30), font, 1, (255, 0, 0), 1, cv2.LINE_AA)
-        if t1 != t2:
-            limits.append(points[i])
-            limits.append(points[i+1])
-
-
-
-    for i in range(len(limits)-1):
-        x1, y1, t1 = limits[i]
-        x2, y2, t2 = limits[i + 1]
-        if t1 == t2 and x1 != x2 and y1 != y2:
-            cv2.line(img, (int(y1), int(x1)), (int(y2), int(x2)), (0, 255, 0), 10)
-            cv2.circle(img, (int(y1), int(x1)), radius=1, color=(0, 0, 255), thickness=20)
-            cv2.circle(img, (int(y2), int(x2)), radius=1, color=(0, 0, 255), thickness=20)
-
-    cv2.imwrite('output-images/lines.png'.format(image_name), img)
-
-def compute_slope(x1, y1, x2, y2):
-    slope = -1
-    if abs(x2 - x1) > 0.1 and x2-x1 != 0:
-        slope = (y2 - y1) / (x2 - x1)
-    return slope
+    if print_lines:
+        cv2.imwrite('output-images/hough.png'.format(image_name), img)
 
 
 def generate_video(points, image_name):
