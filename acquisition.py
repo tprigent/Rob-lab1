@@ -2,6 +2,7 @@ import cv2
 from tqdm import tqdm
 from scipy.spatial.distance import cdist
 import numpy as np
+import math
 
 
 def get_key_points(image_name, nb_points):
@@ -20,7 +21,7 @@ def get_key_points(image_name, nb_points):
     return keypoints
 
 
-def get_keypoints(image_name, point_rate=200):
+def get_points(image_name, point_rate=200):
     img = cv2.imread('input-images/{}'.format(image_name))
 
     # get image shape
@@ -59,20 +60,20 @@ def get_keypoints(image_name, point_rate=200):
     return points
 
 
-def build_path(image_name, downsample, gen_video=0):
+def get_ordered_keypoints(image_name, downsample, gen_video=0):
     # get key points
-    unordered_points = get_keypoints(image_name, 50)
+    unordered_points = get_points(image_name, 50)
 
     # compute distance between each point
     distance_matrix = cdist(unordered_points, unordered_points)
 
     # set 1st point
-    ordered_points = [(unordered_points[0, 0], unordered_points[0, 1])]
-    unordered_points[0, 2] = 1
+    ordered_points = [(unordered_points[1, 0], unordered_points[1, 1])]
+    unordered_points[1, 2] = 1
 
     # iterate over all points
-    i = 0
-    for u in range(len(unordered_points)):        # repeat u times to process all elements
+    i = 1
+    for u in range(len(unordered_points)-1):        # repeat u times to process all elements
         candidate = 0
         min_dist = 10000
         for v in range(len(unordered_points)):    # find the closest point to the previous one
@@ -91,6 +92,96 @@ def build_path(image_name, downsample, gen_video=0):
         generate_video(ordered_points, image_name)
 
     return ordered_points
+
+
+def identify_class(ordered_points, image_name):
+    img = cv2.imread('input-images/{}'.format(image_name))
+    prev_angle = 0
+    th = 10
+    id = 0
+
+    class_points = []
+
+    for i in range(len(ordered_points)-1):
+        x1, y1 = ordered_points[i]
+        x2, y2 = ordered_points[i+1]
+        angle = math.atan2(y2-y1, x2-x1) * 180 / np.pi
+        if abs(angle - prev_angle) > th:
+            id += 1
+
+        prev_angle = angle
+        class_points.append((ordered_points[i+1], id))
+        img = cv2.putText(img, str(id), (y1+8, x1+8), cv2.FONT_HERSHEY_SIMPLEX,
+                            1, (255, 0, 0), 1, cv2.LINE_AA)
+
+    cv2.imwrite('output-images/label.png'.format(image_name), img)
+    return class_points
+
+
+def extract_segments_from_class(class_points):
+    segments = []
+    current_class = 0
+    for i in range(1, len(class_points)):
+        class_p = class_points[i][1]
+        if class_p != current_class:
+            segments.append(class_points[i-1][0])
+            segments.append(class_points[i][0])
+            current_class = class_p
+
+    return segments
+
+
+def extract_POI(points):
+    cleaned_list = []
+    exception_list = []
+    in_exception = 0
+    th = 120
+    for i in range(len(points)-2):
+        x1, y1 = points[i]
+        x2, y2 = points[i+1]
+        dist = ((y2-y1)**2 + (x2-x1)**2)**0.5
+
+        if dist < th:
+            exception_now = 1
+            in_exception = 1
+            exception_list.append(points[i+1])
+        else:
+            exception_now = 0
+            exception_list.append(points[i])
+
+        if exception_now == 0 and in_exception == 1:
+            in_exception = 0
+            cleaned_list.append(centroid(exception_list))
+
+            exception_list = []
+            #cleaned_list.append(points[i + 1])
+
+    cleaned_list.append(points[-1])
+    return cleaned_list
+
+
+def centroid(arr):
+    sum_x = 0
+    sum_y = 0
+    length = len(arr)
+    for i in range(length):
+        sum_x += arr[i][0]
+        sum_y += arr[i][1]
+    return sum_x/length, sum_y/length
+
+
+def draw_segments(segments, image_name):
+    img = cv2.imread('input-images/{}'.format(image_name))
+    for i in range(len(segments)-1):
+
+        y1, x1 = segments[i]
+        y2, x2 = segments[i+1]
+
+        cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 10)
+        cv2.circle(img, (int(x1), int(y1)), radius=1, color=(0, 0, 255), thickness=30)
+        cv2.circle(img, (int(x2), int(y2)), radius=1, color=(0, 0, 255), thickness=30)
+
+    cv2.imwrite('output-images/lines.png'.format(image_name), img)
 
 
 def get_image_format(image_name):
@@ -131,7 +222,7 @@ def generate_video(points, image_name):
     vid = cv2.VideoWriter('output-images/point-order.mp4', cv2.VideoWriter_fourcc('m', 'p', '4', 'v'),
                           5, (img.shape[1], img.shape[0]))
     for i in tqdm(range(len(points))):
-        x, y, z = points[i]
+        x, y = points[i]
         img[x - 8: x + 16, y - 8: y + 16] = [0, 0, 255]
         vid.write(img)
 

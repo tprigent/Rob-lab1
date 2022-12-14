@@ -29,7 +29,11 @@ if __name__ == '__main__':
 
     # image processing
     tools.print_title("### IMAGE PROCESSING ###")
-    keypoints = acquisition.build_path(image_name, downsample=1, gen_video=0)
+    keypoints = acquisition.get_ordered_keypoints(image_name, downsample=1, gen_video=0)    # get ordered points
+    class_points = acquisition.identify_class(keypoints, image_name)    # separate points into class
+    segments = acquisition.extract_segments_from_class(class_points)    # extract extrema for each class (segments)
+    points = acquisition.extract_POI(segments)                          # downsample POI (eliminate nearest neighbours)
+    acquisition.draw_segments(points, image_name)                       # debug function: draw lines between points
 
     # origin definition
     tools.print_title("### ORIGIN DEFINITION ###")
@@ -40,7 +44,7 @@ if __name__ == '__main__':
     tools.print_title("### POINT FRAME CONVERSION ###")
     robot.get_point_coordinates(ser, p0)
     v = robot.get_vector_from_keypoints(keypoints, p0, width, height, 1000)
-    p0.print()
+    p0.print()      # reference check
     user_check = input("-> Is origin correct ? (y|n) ")
     if user_check.lower() != 'y': exit(-1)
 

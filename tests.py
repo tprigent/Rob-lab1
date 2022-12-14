@@ -1,8 +1,8 @@
+import acquisition
 import robot
 import serial_tools
-import acquisition
-import tools
 import platform
+import cv2
 
 if __name__ == '__main__':
 
@@ -30,8 +30,14 @@ if __name__ == '__main__':
     # robot.record_vector(ser, v)
     # robot.draw_vector(ser, v)
 
-    pread = robot.Point(name='vect[1]')
+    image_name = 'test_draw_1.png'
 
-    robot.get_point_coordinates(ser, pread)
+    points = acquisition.get_ordered_keypoints(image_name, 21, gen_video=1)
 
-    pread.print()
+    img = cv2.imread('input-images/{}'.format(image_name))
+    for i in range(len(points)-2):
+        x1, y1 = points[i]
+        x2, y2 = points[i+1]
+        cv2.line(img, (y1, x1), (y2, x2), (0, 255, 0), 10)
+
+    cv2.imwrite('output-images/robot-result.png'.format(image_name), img)

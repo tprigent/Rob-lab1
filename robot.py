@@ -38,7 +38,6 @@ def init_point(ser, name):
 
 
 # fills Point instance with robot memory data
-# todo: to be tested
 def get_point_coordinates(ser=None, point=None):
     # get point info from robot
     response = serial_tools.send(ser, 'listpv {}'.format(point.name))
