@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     # image processing
     tools.print_title("### IMAGE PROCESSING ###")
-    keypoints = acquisition.get_ordered_keypoints(image_name, downsample=1, gen_video=0)    # get ordered points
+    keypoints = acquisition.get_ordered_points(image_name, gen_video=0)    # get ordered points
     class_points = acquisition.identify_class(keypoints, image_name)    # separate points into class
     segments = acquisition.extract_segments_from_class(class_points)    # extract extrema for each class (segments)
     points = acquisition.extract_POI(segments)                          # downsample POI (eliminate nearest neighbours)
