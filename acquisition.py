@@ -34,7 +34,7 @@ def get_points(image_name, point_rate=200):
     ret, thresh = cv2.threshold(blur, 60, 255, cv2.THRESH_BINARY_INV)
 
     # introduce discontinuity
-    print('=> Getting key points')
+    print('=> Reading image points')
     for u in tqdm(range(width)):
         for v in range(height):
             if u == 20 or v == 20: thresh[v, u] = 0
@@ -80,6 +80,7 @@ def get_ordered_points(image_name, gen_video=0):
             if distance_matrix[i, v] < min_dist and distance_matrix[i, v] != 0 and unordered_points[v, 2] == 0:
                 min_dist = distance_matrix[i, v]
                 candidate = v
+        ordered_points.append((int(unordered_points[candidate, 0]), int(unordered_points[candidate, 1])))
         unordered_points[candidate, 2] = 1
         if distance_matrix[i, candidate] > 300:
             print('Step (', unordered_points[candidate, 0], unordered_points[candidate, 1], ') -> ', round(distance_matrix[i, candidate]))
@@ -221,7 +222,7 @@ def generate_video(points, image_name):
                           5, (img.shape[1], img.shape[0]))
     for i in tqdm(range(len(points))):
         x, y = points[i]
-        img[x - 8: x + 16, y - 8: y + 16] = [0, 0, 255]
+        img[int(x) - 8: int(x) + 16, int(y) - 8: int(y) + 16] = [0, 0, 255]
         vid.write(img)
 
     vid.release()
