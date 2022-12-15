@@ -15,7 +15,7 @@ class Point:
 
     def print(self):
         tools.print_title('\n### POINT {} coordinates (in {}) ###'.format(self.name, self.ptype))
-        print('X={}  Y={}  Z={}  P={}  Z={}'.format(self.x, self.y, self.z, self.p, self.r))
+        print('X={}  Y={}  Z={}  P={}  R={}'.format(self.x, self.y, self.z, self.p, self.r))
 
 
 class Vector:
@@ -40,6 +40,8 @@ def init_point(ser, name):
 # fills Point instance with robot memory data
 def get_point_coordinates(ser=None, point=None):
     # get point info from robot
+    serial_tools.send(ser, 'defp {}'.format(point.name))
+    serial_tools.send(ser, 'here {}'.format(point.name))
     response = serial_tools.send(ser, 'listpv {}'.format(point.name))
 
     # run regex to extract coordinates
@@ -66,8 +68,8 @@ def get_point_coordinates(ser=None, point=None):
 # convert point related to image frame to the robot frame relatively to p0
 # + add of r, p, and r coordinates info
 def imgf_to_robf(point, p0, img_width, img_height, scale):
-    point.x = int((point.x / img_width) * scale + p0.x)
-    point.y = int((point.y / img_height) * scale + p0.x)
+    point.x = int((int(point.x) / img_width) * scale + int(p0.x))
+    point.y = int((int(point.y) / img_height) * scale + int(p0.x))
     point.z = p0.z
     point.p = p0.p
     point.r = p0.r
@@ -97,8 +99,8 @@ def moveup_pen(ser, p0, point, up):
 
 
 # function that convert keypoints into a vector
-def get_vector_from_keypoints(keypoints, p0, img_width, img_height, scale):
-    vect = Vector(name='path')
+def get_vector_from_keypoints(keypoints, p0, name,img_width, img_height, scale):
+    vect = Vector(name=name)
     vect.points = []
     for i in range(len(keypoints)):
         p = Point('p{}'.format(i), x=keypoints[i][0], y=keypoints[i][1])
@@ -120,10 +122,12 @@ def boundaries(ser, vect, P0):
 
 def record_vector(ser, vector):
     dim = len(vector.points)
+    #serial_tools.send(ser, 'DEFP {}'.format(vector.name))
     serial_tools.send(ser, 'DIMP {}[{}]'.format(vector.name, dim))
     c = 1
     for i in vector.points:
         if i.ptype == 'robot':
+            serial_tools.send(ser, 'DEFP {}[{}]'.format(vector.name, c))
             serial_tools.send(ser, 'TEACH {}[{}]'.format(vector.name, c))
             serial_tools.send(ser, '{}'.format(i.x))
             serial_tools.send(ser, '{}'.format(i.y))
