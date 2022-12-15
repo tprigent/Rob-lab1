@@ -21,3 +21,13 @@ def log(msg):
     timestamp = datetime.datetime.now()
     log_text = '{}: {}\n'.format(timestamp, msg)
     f_log.write(log_text)
+
+
+def centroid(arr):
+    sum_x = 0
+    sum_y = 0
+    length = len(arr)
+    for i in range(length):
+        sum_x += arr[i][0]
+        sum_y += arr[i][1]
+    return sum_x/length, sum_y/length

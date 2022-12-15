@@ -1,10 +1,12 @@
 import cv2
+import tools
 from tqdm import tqdm
 from scipy.spatial.distance import cdist
 import numpy as np
 import math
 
 
+# use of OpenCV function to detect key points (not used yet)
 def get_key_points(image_name, nb_points):
     # open image & convert to grayscale
     image = cv2.imread('input-images/{}'.format(image_name))
@@ -21,6 +23,9 @@ def get_key_points(image_name, nb_points):
     return keypoints
 
 
+# get all black points of an image
+# down sample them by introducing discontinuities at a certain point rate
+# and computing the centroids of the remaining points
 def get_points(image_name, point_rate=200):
     img = cv2.imread('input-images/{}'.format(image_name))
 
@@ -60,6 +65,7 @@ def get_points(image_name, point_rate=200):
     return points
 
 
+# get points from the drawing and order them according to the distance to each other (path following)
 def get_ordered_points(image_name, gen_video=0):
     # get key points
     unordered_points = get_points(image_name, 50)
@@ -95,6 +101,7 @@ def get_ordered_points(image_name, gen_video=0):
     return ordered_points
 
 
+# classify points regarding to the angle they make regarding the x-axis
 def identify_class(ordered_points, image_name):
     img = cv2.imread('input-images/{}'.format(image_name))
     prev_angle = 0
@@ -119,6 +126,7 @@ def identify_class(ordered_points, image_name):
     return class_points
 
 
+# returns array containing first and last point of each class (making segments)
 def extract_segments_from_class(class_points):
     segments = []
     current_class = 0
@@ -132,6 +140,7 @@ def extract_segments_from_class(class_points):
     return segments
 
 
+# from start and end point of each class, remove points in a too close neighborhood
 def extract_POI(points):
     cleaned_list = []
     exception_list = []
@@ -142,35 +151,25 @@ def extract_POI(points):
         x2, y2 = points[i+1]
         dist = ((y2-y1)**2 + (x2-x1)**2)**0.5
 
-        if dist < th:
+        if dist < th:                       # start exception list if points are too close to each other
             exception_now = 1
             in_exception = 1
             exception_list.append(points[i+1])
-        else:
+        else:                               # else simply add it to regular list
             exception_now = 0
             exception_list.append(points[i])
 
-        if exception_now == 0 and in_exception == 1:
+        if exception_now == 0 and in_exception == 1:    # detect switch between close points and far points
             in_exception = 0
-            cleaned_list.append(centroid(exception_list))
+            cleaned_list.append(tools.centroid(exception_list))
 
             exception_list = []
-            #cleaned_list.append(points[i + 1])
 
     cleaned_list.append(points[-1])
     return cleaned_list
 
 
-def centroid(arr):
-    sum_x = 0
-    sum_y = 0
-    length = len(arr)
-    for i in range(length):
-        sum_x += arr[i][0]
-        sum_y += arr[i][1]
-    return sum_x/length, sum_y/length
-
-
+# overlay segment drawing between all contiguous points of an array
 def draw_segments(segments, image_name):
     img = cv2.imread('input-images/{}'.format(image_name))
     for i in range(len(segments)-1):
@@ -195,6 +194,7 @@ def get_image_format(image_name):
     return width, height
 
 
+# line detection function using Hough transform and OpenCV (not used yet)
 def get_lines(image_name, print_lines):
     img = cv2.imread('input-images/{}'.format(image_name))
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -216,6 +216,7 @@ def get_lines(image_name, print_lines):
         cv2.imwrite('output-images/lines.png'.format(image_name), img)
 
 
+# generate video to demonstrate point apparition order
 def generate_video(points, image_name):
     print('\n=> Generating video')
 
