@@ -111,20 +111,19 @@ def get_vector_from_keypoints(keypoints, p0, name,img_width, img_height, scale):
 
 def record_vector(ser, vector):
     dim = len(vector.points)
-    #serial_tools.send(ser, 'DEFP {}'.format(vector.name))
+    # serial_tools.send(ser, 'DEFP {}'.format(vector.name))
     serial_tools.send(ser, 'DIMP {}[{}]'.format(vector.name, dim))
     c = 1
     for i in vector.points:
         if i.ptype == 'robot':
-            serial_tools.send(ser, 'DEFP {}[{}]'.format(vector.name, c))
-            serial_tools.send(ser, 'TEACH {}[{}]'.format(vector.name, c))
-            serial_tools.send(ser, '{}'.format(i.x))
-            serial_tools.send(ser, '{}'.format(i.y))
-            serial_tools.send(ser, '{}'.format(i.z))
-            serial_tools.send(ser, '{}'.format(i.p))
-            serial_tools.send(ser, '{}'.format(i.r))
-            serial_tools.send(ser, 'MOVE {}[{}]'.format(vector.name, c))
+            # todo: check if command script is correct
             serial_tools.send(ser, 'HERE {}[{}]'.format(vector.name, c))
+            serial_tools.send(ser, 'SETP {}[{}]=POSITION'.format(vector.name, c))
+            serial_tools.send(ser, 'SETPVC {}[{}] X {}'.format(vector.name, c, vector.points[i].x))
+            serial_tools.send(ser, 'SETPVC {}[{}] Y {}'.format(vector.name, c, vector.points[i].y))
+            serial_tools.send(ser, 'SETPVC {}[{}] Z {}'.format(vector.name, c, vector.points[i].z))
+            serial_tools.send(ser, 'SETPVC {}[{}] P {}'.format(vector.name, c, vector.points[i].p))
+            serial_tools.send(ser, 'SETPVC {}[{}] R {}'.format(vector.name, c, vector.points[i].r))
             c += 1
         else:
             print('Error: points still in the image frame')
