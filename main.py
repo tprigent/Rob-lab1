@@ -20,11 +20,11 @@ if __name__ == '__main__':
 
     # home
     tools.print_title("### HOME ROBOT ###")
-    home = input("-> Do you want to set robot to home position ? (y|n) ")
-    if home.lower() == 'y': serial_tools.send(ser, 'home')
+    #home = input("-> Do you want to set robot to home position ? (y|n) ")
+    #if home.lower() == 'y': serial_tools.send(ser, 'home')
 
     # define input image
-    image_name = 'test_draw_1.png'
+    image_name = 'test_draw_2.png'
     width, height = acquisition.get_image_format(image_name)
 
     # image processing

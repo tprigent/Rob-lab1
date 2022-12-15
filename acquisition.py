@@ -2,6 +2,7 @@ import cv2
 import tools
 from tqdm import tqdm
 from scipy.spatial.distance import cdist
+from collections import Counter
 import numpy as np
 import math
 
@@ -130,9 +131,15 @@ def identify_class(ordered_points, image_name):
 def extract_segments_from_class(class_points):
     segments = []
     current_class = 0
+
+    # create a new list that contains only the classes that occur once (noise)
+    counts = Counter([c for pt, c in class_points])
+    once = [c for c, count in counts.items() if count == 1]
+
+    # analyse remaining segments
     for i in range(1, len(class_points)):
         class_p = class_points[i][1]
-        if class_p != current_class:
+        if class_p != current_class and class_p not in once:
             segments.append(class_points[i-1][0])
             segments.append(class_points[i][0])
             current_class = class_p
