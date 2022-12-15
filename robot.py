@@ -106,6 +106,17 @@ def get_vector_from_keypoints(keypoints, p0, img_width, img_height, scale):
         vect.points.append(p)
     return vect
 
+def boundaries(ser, vect, P0):
+    Xmax=2970
+    Ymax=2100
+    for i in vect.points:
+        if i.x < Xmax and -1*Ymax<=i.y<=Ymax and i.z==P0.z:
+            print('Inside the boundaries')
+        else:
+            print('The points are out of limits')
+
+
+
 
 def record_vector(ser, vector):
     dim = len(vector.points)
