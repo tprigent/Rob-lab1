@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     # serial connect
     ser = serial_tools.connect_serial(serial_port)
-    if ser is None: exit(-1)
+    #if ser is None: exit(-1)
 
     # home
     tools.print_title("### HOME ROBOT ###")
@@ -34,7 +34,6 @@ if __name__ == '__main__':
     segments = acquisition.extract_segments_from_class(class_points)    # extract extrema for each class (segments)
     points = acquisition.extract_POI(segments)                          # downsample POI (eliminate nearest neighbours)
     acquisition.draw_segments(points, image_name)                       # debug function: draw lines between points
-
     # origin definition
     tools.print_title("### ORIGIN DEFINITION ###")
     p0 = robot.Point(name='p9')  # reference point
@@ -55,3 +54,4 @@ if __name__ == '__main__':
     # start drawing
     tools.print_title("### START DRAWING ###")
     robot.draw_vector(ser, v)
+    robot.draw_circ_vector(ser,v)
