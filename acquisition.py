@@ -80,12 +80,14 @@ def get_ordered_points(image_name, gen_video=0):
             if distance_matrix[i, v] < min_dist and distance_matrix[i, v] != 0 and unordered_points[v, 2] == 0:
                 min_dist = distance_matrix[i, v]
                 candidate = v
-        ordered_points.append((int(unordered_points[candidate, 0]), int(unordered_points[candidate, 1])))
-        unordered_points[candidate, 2] = 1
+        if int(unordered_points[candidate, 0]) > 1: 
+            if int(unordered_points[candidate, 1]) > 1:
+                ordered_points.append((int(unordered_points[candidate, 0]), int(unordered_points[candidate, 1])))
+                unordered_points[candidate, 2] = 1
+                
         if distance_matrix[i, candidate] > 300:
             print('Step (', unordered_points[candidate, 0], unordered_points[candidate, 1], ') -> ', round(distance_matrix[i, candidate]))
         i = candidate
-
     # video generation (for infography)
     if gen_video:
         generate_video(ordered_points, image_name)
