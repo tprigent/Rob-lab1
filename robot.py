@@ -67,13 +67,19 @@ def get_point_coordinates(ser=None, point=None):
 
 # convert point related to image frame to the robot frame relatively to p0
 # + add of r, p, and r coordinates info
-def imgf_to_robf(point, p0, img_width, img_height, scale):
-    point.x = int((int(point.x) / img_width) * scale + int(p0.x))
-    point.y = int((int(point.y) / img_height) * scale + int(p0.x))
+def imgf_to_robf(point, p0, img_width, img_height, scale, rotate90):
+    if rotate90 == 0:
+        point.x = int((int(point.x) / img_width) * scale + int(p0.x))
+        point.y = int((int(point.y) / img_height) * scale + int(p0.x))
+    else:
+        point.y = int((int(point.x) / img_width) * scale + int(p0.x))
+        point.x = int((int(point.y) / img_height) * scale + int(p0.x))
     point.z = p0.z
     point.p = p0.p
     point.r = p0.r
     point.ptype = 'robot'
+
+    return respects_boundaries(point)
 
 
 # function that change the coordinates x,y,z,p,r of a position pos relatively to P0
@@ -98,26 +104,22 @@ def moveup_pen(ser, p0, point, up):
         serial_tools.send(ser, 'move {}'.format(point.name))
 
 
-# function that convert keypoints into a vector
-def get_vector_from_keypoints(keypoints, p0, name,img_width, img_height, scale):
+# function that converts key points to a vector
+def get_vector_from_keypoints(keypoints, p0, name, img_width, img_height, scale, rotate90):
     vect = Vector(name=name)
     vect.points = []
+    reachability = 0
     for i in range(len(keypoints)):
         p = Point('p{}'.format(i), x=keypoints[i][0], y=keypoints[i][1])
-        imgf_to_robf(p, p0, img_width, img_height, scale)
+        reachability |= imgf_to_robf(p, p0, img_width, img_height, scale, rotate90)
         vect.points.append(p)
-    return vect
-
-def boundaries(ser, vect, P0):
-    Xmax=2970
-    Ymax=2100
-    for i in vect.points:
-        if i.x < Xmax and -1*Ymax<=i.y<=Ymax and i.z==P0.z:
-            print('Inside the boundaries')
-        else:
-            print('The points are out of limits')
+    return vect, reachability
 
 
+def respects_boundaries(point):
+    x_max = 2970
+    y_max = 2100
+    return point.x < x_max and -y_max <= point.y <= y_max
 
 
 def record_vector(ser, vector):
@@ -144,7 +146,7 @@ def record_vector(ser, vector):
 # function that allows to move the robot along the vector of position "vector" from the position 1 to n
 def draw_vector(ser, vector):
     n = len(vector.points)
-    serial_tools.send(ser, 'MOVES {} 1 {}'.format(vector.name, n))
+    serial_tools.send(ser, 'MOVES {} 1 {}'.format(vector.name, n), ask=1)
 
 
 # function that allows to move the robot along the vector of position "vector" from the position 1 to n with a

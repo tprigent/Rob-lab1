@@ -34,16 +34,19 @@ if __name__ == '__main__':
     segments = acquisition.extract_segments_from_class(class_points)    # extract extrema for each class (segments)
     points = acquisition.extract_POI(segments)                          # downsample POI (eliminate nearest neighbours)
     acquisition.draw_segments(points, image_name)                       # debug function: draw lines between points
+
     # origin definition
     tools.print_title("### ORIGIN DEFINITION ###")
-    p0 = robot.Point(name='p9')  # reference point
+    p0 = robot.Point(name='p0')  # reference point
     input("-> Please set robot to origin (and press enter) ")
 
     # point frame conversion
     tools.print_title("### POINT FRAME CONVERSION ###")
     robot.get_point_coordinates(ser, p0)
-    v = robot.get_vector_from_keypoints(points, p0, 'vect',width, height, 400)
-    p0.print()      # reference check
+    v, reachability = robot.get_vector_from_keypoints(points, p0, 'vect', width, height, scale=400, rotate90=1)
+    if reachability == 0:       # check reachability of all points
+        print("-> Some points are not reachable. Please select another p0, orientation or reconsider the scale value.")
+    p0.print()                  # reference check
     user_check = input("-> Is origin correct ? (y|n) ")
     if user_check.lower() != 'y': exit(-1)
 
