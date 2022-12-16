@@ -10,13 +10,13 @@ if __name__ == '__main__':
 
     # define serial port name
     if platform.system() == 'Darwin':
-        serial_port = '/dev/cu.usbserial-14310'     # macOS
+        serial_port = '/dev/ttys004'     # macOS
     else:
         serial_port = "COM3"             # Windows
 
     # serial connect
     ser = serial_tools.connect_serial(serial_port)
-    #if ser is None: exit(-1)
+    if ser is None: exit(-1)
 
     # home
     tools.print_title("### HOME ROBOT ###")
@@ -37,13 +37,14 @@ if __name__ == '__main__':
 
     # origin definition
     tools.print_title("### ORIGIN DEFINITION ###")
-    p0 = robot.Point(name='p0')  # reference point
-    input("-> Please set robot to origin (and press enter) ")
+    #p0 = robot.Point(name='p0')  # reference point
+    p0 = robot.Point(name='p0', x=4960, y=1841, z=1716, p=-840, r=-202, ptype='robot')
+    #input("-> Please set robot to origin (and press enter) ")
 
     # point frame conversion
     tools.print_title("### POINT FRAME CONVERSION ###")
     robot.get_point_coordinates(ser, p0)
-    v, reachability = robot.get_vector_from_keypoints(points, p0, 'vect', width, height, scale=400, rotate90=1)
+    v, reachability = robot.get_vector_from_keypoints(points, p0, 'vect', width, height, rotate90=1)
     if reachability == 0:       # check reachability of all points
         print("-> Some points are not reachable. Please select another p0, orientation or reconsider the scale value.")
     p0.print()                  # reference check

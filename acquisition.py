@@ -191,17 +191,6 @@ def draw_segments(segments, image_name):
 
     cv2.imwrite('output-images/lines.png'.format(image_name), img)
 
-#from start to finish, remove
-def comp_segments(all_points,segments, threshold):
-    for i in range(len(segments)-1):
-        y1, x1 = segments[i]         #get segment points
-        y2, x2 = segments[i+1]
-        angle = math.atan2(y2 - y1, x2 - x1) * 180 / np.pi
-        for j in range(len(all_points)-1):
-            y3, x3 = segments[j]
-            y4, x4 = segments[j]
-            if math.tan(angle)
-
 
 def get_image_format(image_name):
     img = cv2.imread('input-images/{}'.format(image_name))
