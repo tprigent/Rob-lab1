@@ -81,6 +81,15 @@ def imgf_to_robf(point, p0, img_width, img_height, scale, rotate90):
 
     return respects_boundaries(point)
 
+def maxscale(img_width,img_height):
+    
+    x_max = 5000
+    y_max = 3000
+    
+    x_scale = img_width/x_max
+    y_scale = img_height/y_max
+    
+    return x_scale, y_scale
 
 # function that change the coordinates x,y,z,p,r of a position pos relatively to P0
 # '{}'.format(x) permet d'envoyer une valeur à la place de la variable au lieu d'un caractère
