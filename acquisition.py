@@ -80,20 +80,21 @@ def get_ordered_points(image_name, gen_video=0):
 
     # iterate over all points
     i = 1
-    for u in range(len(unordered_points)-1):        # repeat u times to process all elements
+    for u in range(len(unordered_points) - 1):  # repeat u times to process all elements
         candidate = 0
         min_dist = 10000
-        for v in range(len(unordered_points)):    # find the closest point to the previous one
+        for v in range(len(unordered_points)):  # find the closest point to the previous one
             if distance_matrix[i, v] < min_dist and distance_matrix[i, v] != 0 and unordered_points[v, 2] == 0:
                 min_dist = distance_matrix[i, v]
                 candidate = v
-        if int(unordered_points[candidate, 0]) > 1: 
+        if int(unordered_points[candidate, 0]) > 1:
             if int(unordered_points[candidate, 1]) > 1:
                 ordered_points.append((int(unordered_points[candidate, 0]), int(unordered_points[candidate, 1])))
                 unordered_points[candidate, 2] = 1
-                
+
         if distance_matrix[i, candidate] > 300:
-            print('Step (', unordered_points[candidate, 0], unordered_points[candidate, 1], ') -> ', round(distance_matrix[i, candidate]))
+            print('Step (', unordered_points[candidate, 0], unordered_points[candidate, 1], ') -> ',
+                  round(distance_matrix[i, candidate]))
         i = candidate
     # video generation (for infography)
     if gen_video:
@@ -102,26 +103,26 @@ def get_ordered_points(image_name, gen_video=0):
     return ordered_points
 
 
-# classify points regarding to the angle they make regarding the x-axis
+# classify points regarding the angle they make regarding the x-axis
 def identify_class(ordered_points, image_name):
     img = cv2.imread('input-images/{}'.format(image_name))
     prev_angle = 0
-    th = 10
+    th = 4
     id = 0
 
     class_points = []
 
-    for i in range(len(ordered_points)-1):
+    for i in range(len(ordered_points) - 2):
         x1, y1 = ordered_points[i]
-        x2, y2 = ordered_points[i+1]
-        angle = math.atan2(y2-y1, x2-x1) * 180 / np.pi
+        x2, y2 = ordered_points[i + 2]
+        angle = math.atan2(y2 - y1, x2 - x1) * 180 / np.pi
         if abs(angle - prev_angle) > th:
             id += 1
 
         prev_angle = angle
-        class_points.append((ordered_points[i+1], id))
-        img = cv2.putText(img, str(id), (y1+8, x1+8), cv2.FONT_HERSHEY_SIMPLEX,
-                            1, (255, 0, 0), 1, cv2.LINE_AA)
+        class_points.append((ordered_points[i + 1], id))
+        img = cv2.putText(img, str(id), (y1 + 8, x1 + 8), cv2.FONT_HERSHEY_SIMPLEX,
+                          1, (255, 0, 0), 1, cv2.LINE_AA)
 
     cv2.imwrite('output-images/label.png'.format(image_name), img)
     return class_points
@@ -139,7 +140,7 @@ def extract_segments_from_class(class_points):
     # analyse remaining segments
     for i in range(1, len(class_points)):
         class_p = class_points[i][1]
-        if class_p != current_class and class_p not in once:
+        if (class_p != current_class and class_p not in once) or len(class_points)-i <= 2:
             segments.append(class_points[i-1][0])
             segments.append(class_points[i][0])
             current_class = class_p
@@ -153,20 +154,20 @@ def extract_POI(points):
     exception_list = []
     in_exception = 0
     th = 120
-    for i in range(len(points)-2):
+    for i in range(len(points) - 2):
         x1, y1 = points[i]
-        x2, y2 = points[i+1]
-        dist = ((y2-y1)**2 + (x2-x1)**2)**0.5
+        x2, y2 = points[i + 1]
+        dist = ((y2 - y1) ** 2 + (x2 - x1) ** 2) ** 0.5
 
-        if dist < th:                       # start exception list if points are too close to each other
+        if dist < th:  # start exception list if points are too close to each other
             exception_now = 1
             in_exception = 1
-            exception_list.append(points[i+1])
-        else:                               # else simply add it to regular list
+            exception_list.append(points[i + 1])
+        else:  # else simply add it to regular list
             exception_now = 0
             exception_list.append(points[i])
 
-        if exception_now == 0 and in_exception == 1:    # detect switch between close points and far points
+        if exception_now == 0 and in_exception == 1:  # detect switch between close points and far points
             in_exception = 0
             cleaned_list.append(tools.centroid(exception_list))
 
@@ -179,8 +180,8 @@ def extract_POI(points):
 # overlay segment drawing between all contiguous points of an array
 def draw_segments(segments, image_name):
     img = cv2.imread('input-images/{}'.format(image_name))
-    for i in range(len(segments)-1):
 
+    for i in range(len(segments)-1):
         y1, x1 = segments[i]
         y2, x2 = segments[i+1]
 

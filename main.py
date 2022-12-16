@@ -24,7 +24,7 @@ if __name__ == '__main__':
     #if home.lower() == 'y': serial_tools.send(ser, 'home')
 
     # define input image
-    image_name = 'test_draw_2.png'
+    image_name = 'test_draw_1.png'
     width, height = acquisition.get_image_format(image_name)
 
     # image processing

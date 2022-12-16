@@ -31,3 +31,10 @@ def centroid(arr):
         sum_x += arr[i][0]
         sum_y += arr[i][1]
     return sum_x/length, sum_y/length
+
+
+def distance(point1, point2):
+    # Calculate the Euclidean distance between two points
+    x1, y1 = point1
+    x2, y2 = point2
+    return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
