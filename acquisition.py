@@ -197,6 +197,7 @@ def boundaries(ser, vect, P0):
         else:
             print('The points are out of limits')
 
+
 #funtion that says if the line between two points are straight or circular and then chose the good move
 
 #Approach: reading the array of point of interest we compute the equation of the straight line between two points
@@ -211,28 +212,31 @@ def curve_path(cleaned_list, ordered_points):
         b = cleaned_list[i][0]-cleaned_list[i+1][0]
         c = a*(cleaned_list[0][0]) + b*(cleaned_list[0][0])
         for j in range(len(ordered_points)-1):
-            if cleaned_list[i+1]==ordered_points[j+1] or (abs(cleaned_list[i+1][0]-ordered_points[i+1][0])<epsilon and abs(cleaned_list[i+1][1]-ordered_points[i+1][1])<epsilon):
-                index1=index(ordered_points,cleaned_list[i])
-                index2=index(ordered_points, cleaned_list[i+1])
+            if cleaned_list[i+1] == ordered_points[j+1] or (abs(cleaned_list[i+1][0]-ordered_points[i+1][0])<epsilon and abs(cleaned_list[i+1][1]-ordered_points[i+1][1])<epsilon):
+                index1 = find_index(ordered_points,cleaned_list[i])
+                index2 = find_index(ordered_points, cleaned_list[i+1])
                 distance = abs((a * ordered_points[i][0] + b * ordered_points[i][1] + c)) / (math.sqrt(a * a + b * b))
-                middle=math.floor(abs(index1-index2)/2)
+                middle = math.floor(abs(index1-index2)/2)
                 if distance > th:   
                     new_point=ordered_points[middle+index1]
                     cleaned_list.insert(i+1, new_point)
     print(new_point)
     draw_segments('test_draw_1.png', cleaned_list)              
 
+
 #function that compute the distance between 2 points
 def distance(p1, p2):
     return (((p1[0]-p2[0])**2+(p1[1]-p2[1])**2)**0.5)
 
+
 #function that returns the index of the nearest point of "point" in a table of points 
-def index(ordered_points, point):
-    d_min=1000
+def find_index(ordered_points, point):
+    d_min = 1000
+    index = 0
     for i in range(len(ordered_points)):
-        if distance(ordered_points[i],point)<d_min:
-            index=i
-            d_min=distance(ordered_points[i],point)
+        if distance(ordered_points[i], point) < d_min:
+            index = i
+            d_min = distance(ordered_points[i], point)
     return index
 
     
