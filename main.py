@@ -44,7 +44,7 @@ if __name__ == '__main__':
     # point frame conversion
     tools.print_title("### POINT FRAME CONVERSION ###")
     robot.get_point_coordinates(ser, p0)
-    v, reachability = robot.get_vector_from_keypoints(points, p0, 'vect', width, height, rotate90=1)
+    v, reachability = robot.get_vector_from_keypoints(points, p0, 'vect', width, height, scale=1000,rotate90=1)
     if reachability == 0:       # check reachability of all points
         print("-> Some points are not reachable. Please select another p0, orientation or reconsider the scale value.")
     p0.print()                  # reference check
