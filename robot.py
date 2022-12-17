@@ -71,11 +71,11 @@ def imgf_to_robf(point, p0, img_width, img_height, scale, rotate90):
     unit_factor = max(img_width, img_height)
 
     if rotate90 == 0:
-        point.x = p0.x + (img_width / unit_factor) * scale
-        point.y = p0.y - (img_height / unit_factor) * scale     # Y axis reverted in robot frame
+        point.x = p0.x + int((img_width / unit_factor) * scale)
+        point.y = p0.y - int((img_height / unit_factor) * scale)     # Y axis reverted in robot frame
     else:
-        point.x = p0.y - (img_height / unit_factor) * scale     # Y axis reverted in robot frame
-        point.y = p0.x + (img_width / unit_factor) * scale
+        point.x = p0.y - int((img_height / unit_factor) * scale)     # Y axis reverted in robot frame
+        point.y = p0.x + int((img_width / unit_factor) * scale)
 
     point.z = p0.z
     point.p = p0.p
