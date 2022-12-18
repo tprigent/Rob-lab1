@@ -33,6 +33,7 @@ if __name__ == '__main__':
     class_points = acquisition.identify_class(all_points, image_name)    # separate points into class
     segments = acquisition.extract_segments_from_class(class_points)    # extract extrema for each class (segments)
     points = acquisition.extract_POI(segments)                          # downsample POI (eliminate nearest neighbours)
+    # acquisition.curve_path(points, all_points)
     acquisition.draw_segments(points, image_name)                       # debug function: draw lines between points
 
     # origin definition

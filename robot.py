@@ -119,6 +119,7 @@ def get_vector_from_keypoints(keypoints, p0, name, img_width, img_height, scale,
     return vect, reachability
 
 
+# Check if a point respects the robot physical and environmental limits
 def respects_boundaries(point):
     x_min = 3000
     x_max = 7000
@@ -127,6 +128,7 @@ def respects_boundaries(point):
     return x_min < point.x < x_max and y_min < point.y < y_max
 
 
+# Define a vector in the robot's memory
 def record_vector(ser, vector):
     dim = len(vector.points)
     # serial_tools.send(ser, 'DEFP {}'.format(vector.name))

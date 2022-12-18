@@ -3,6 +3,7 @@ import time
 import tools
 
 
+# Establish RS232 serial connection to device
 def connect_serial(serial_port, baudrate=9600):
     tools.print_title("### SERIAL CONNECTION ###")
     try:
@@ -16,6 +17,7 @@ def connect_serial(serial_port, baudrate=9600):
         return None
 
 
+# Read serial input buffer (including timeout of 1s)
 def receive(ser):
     response_incoming = 0           # flag for data incoming
     output = ''                     # prepare response buffer
@@ -38,6 +40,7 @@ def receive(ser):
     return output
 
 
+# Send message to device and listen for automatic answer
 def send(ser, msg, ask=0):
     if ask:
         input('-> Ready to continue ? (press enter)')
