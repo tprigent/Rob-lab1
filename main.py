@@ -20,8 +20,8 @@ if __name__ == '__main__':
 
     # home
     tools.print_title("### HOME ROBOT ###")
-    #home = input("-> Do you want to set robot to home position ? (y|n) ")
-    #if home.lower() == 'y': serial_tools.send(ser, 'home')
+    home = input("-> Do you want to set robot to home position ? (y|n) ")
+    if home.lower() == 'y': serial_tools.send(ser, 'home')
 
     # define input image
     image_name = 'test_draw_1.png'
@@ -33,22 +33,23 @@ if __name__ == '__main__':
     class_points = acquisition.identify_class(all_points, image_name)    # separate points into class
     segments = acquisition.extract_segments_from_class(class_points)    # extract extrema for each class (segments)
     points = acquisition.extract_POI(segments)                          # downsample POI (eliminate nearest neighbours)
-    # acquisition.curve_path(points, all_points)
+    acquisition.curve_path(points, all_points)
     acquisition.draw_segments(points, image_name)                       # debug function: draw lines between points
 
     # origin definition
     tools.print_title("### ORIGIN DEFINITION ###")
-    #p0 = robot.Point(name='p0')  # reference point
-    p0 = robot.Point(name='p0', x=4960, y=1841, z=1716, p=-840, r=-202, ptype='robot')
-    #input("-> Please set robot to origin (and press enter) ")
+    p0 = robot.Point(name='p0')  # reference point
+    #p0 = robot.Point(name='p0', x=6200, y=1841, z=1716, p=-840, r=-202, ptype='robot')
+    input("-> Please set robot to origin (and press enter) ")
 
     # point frame conversion
     tools.print_title("### POINT FRAME CONVERSION ###")
     robot.get_point_coordinates(ser, p0)
-    v, reachability = robot.get_vector_from_keypoints(points, p0, 'vect', width, height, scale=1000,rotate90=1)
+    v, reachability = robot.get_vector_from_keypoints(points, p0, 'vect', width, height, scale=0.5, rotate90=0)
     if reachability == 0:       # check reachability of all points
         print("-> Some points are not reachable. Please select another p0, orientation or reconsider the scale value.")
     p0.print()                  # reference check
+    robot.draw_in_robot_environment(p0, v)
     user_check = input("-> Is origin correct ? (y|n) ")
     if user_check.lower() != 'y': exit(-1)
 
