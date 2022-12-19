@@ -139,15 +139,25 @@ def record_vector(ser, vector):
     c = 1
     for i in vector.points:
         if i.ptype == 'robot':
-            # todo: check if command script is correct
+
+            # define point
+            serial_tools.send(ser, 'DEFP {}[{}]'.format(vector.name, c))
             serial_tools.send(ser, 'HERE {}[{}]'.format(vector.name, c))
-            serial_tools.send(ser, 'SETP {}[{}]=POSITION'.format(vector.name, c))
+
+            if c > 1:   # if possible, copy point from previous one
+                serial_tools.send(ser, 'SETP {}[{}]={}[{}]'.format(vector.name, c, vector.name, c-1))
+
+            # send new x y coordinates each time
             serial_tools.send(ser, 'SETPVC {}[{}] X {}'.format(vector.name, c, vector.points[c-1].x))
             serial_tools.send(ser, 'SETPVC {}[{}] Y {}'.format(vector.name, c, vector.points[c-1].y))
-            serial_tools.send(ser, 'SETPVC {}[{}] Z {}'.format(vector.name, c, vector.points[c-1].z))
-            serial_tools.send(ser, 'SETPVC {}[{}] P {}'.format(vector.name, c, vector.points[c-1].p))
-            serial_tools.send(ser, 'SETPVC {}[{}] R {}'.format(vector.name, c, vector.points[c-1].r))
-            c += 1
+
+            if c == 1:  # if first point, define coordinates
+                serial_tools.send(ser, 'SETPVC {}[{}] Z {}'.format(vector.name, c, vector.points[c-1].z))
+                serial_tools.send(ser, 'SETPVC {}[{}] P {}'.format(vector.name, c, vector.points[c-1].p))
+                serial_tools.send(ser, 'SETPVC {}[{}] R {}'.format(vector.name, c, vector.points[c-1].r))
+
+            c += 1  # increment vector counter
+
         else:
             print('Error: points still in the image frame')
             exit(-1)
