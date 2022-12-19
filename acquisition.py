@@ -160,12 +160,47 @@ def extract_POI(points):
     return cleaned_list
 
 
+def curve_approx(all_points, line_points):
+    curve_points = []
+    correspondences = []
+    index_lp = 0
+    for p in line_points:
+        candidate = (0, 0)
+        min_dist = float('inf')
+        index_correspondance = 0
+        for k in all_points:
+            dist = tools.distance(p, k)
+            if dist < min_dist:
+                candidate = index_correspondance
+                min_dist = dist
+            index_correspondance += 1
+        correspondences.append((index_lp, candidate))
+        index_lp += 1
+
+    for i in range(len(correspondences)-1):
+        curve_points.append(line_points[correspondences[i][0]])
+        start = correspondences[i][1]
+        end = correspondences[i+1][1]
+
+        x1 = all_points[start][0]
+        y1 = all_points[start][1]
+        x2 = all_points[round((end-start)/2)][0]
+        y2 = all_points[round((end-start) / 2)][1]
+        x3 = all_points[end][0]
+        y3 = all_points[end][1]
+
+        if tools.is_aligned(x1, y1, x2, y2, x3, y3, th=800) == 0:
+            curve_points.append((all_points[round((start+end)/2)][0], all_points[round((start+end)/2)][1]))
+
+    curve_points.append(line_points[-1])
+    return curve_points
+
+
 # function that says if the line between two points are straight or circular and then chose the good move
 
 # Approach: reading the array of point of interest we compute the equation of the straight line between two points
 # Then, we compare the between the points in the array of ordered points to check if the line is straight or not
 #          If the line is straight --> MOVE, if it's not, we add a point and do a MOVEC
-
 def curve_path(cleaned_list, ordered_points):
     th=1500
     epsilon=1000
