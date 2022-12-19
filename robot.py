@@ -1,4 +1,7 @@
 import re
+import cv2
+import numpy as np
+
 import serial_tools
 import tools
 
@@ -67,15 +70,16 @@ def get_point_coordinates(ser=None, point=None):
 
 # convert point related to image frame to the robot frame relatively to p0
 # + add of r, p, and r coordinates info
-def imgf_to_robf(point, p0, img_width, img_height, rotate90):
-    scale = maxscale(img_width, img_height)
+def imgf_to_robf(point, p0, img_width, img_height, scale, rotate90):
+    unit_factor = max(img_width, img_height)
+
     if rotate90 == 0:
-        print(p0)
-        point.x = point.x *(img_width/120) + p0.x
-        point.y = int(p0.y) - int((int(point.y) / img_height) * scale)  # y axis is inverted
+        point.x = int(p0.x) - int(point.x * (img_width / unit_factor) * scale)
+        point.y = int(p0.y) - int(point.y * (img_height / unit_factor) * scale)     # Y axis reverted in robot frame
     else:
-        point.y = int(p0.x) - int((int(point.x) / img_width) * scale)   # y axis is inverted
-        point.x = int((int(point.y) / img_height) * scale + int(p0.y))
+        point.x = int(p0.y) - int(point.y * (img_height / unit_factor) * scale)     # Y axis reverted in robot frame
+        point.y = int(p0.x) - int(point.x * (img_width / unit_factor) * scale)
+
     point.z = p0.z
     point.p = p0.p
     point.r = p0.r
@@ -83,16 +87,6 @@ def imgf_to_robf(point, p0, img_width, img_height, rotate90):
 
     return respects_boundaries(point)
 
-
-def maxscale(img_width, img_height):
-    
-    x_max = 5000
-    y_max = 3000
-    
-    x_scale = img_width/x_max
-    y_scale = img_height/y_max
-    
-    return max(x_scale, y_scale)
 
 # function that change the coordinates x,y,z,p,r of a position pos relatively to P0
 # '{}'.format(x) permet d'envoyer une valeur à la place de la variable au lieu d'un caractère
@@ -117,23 +111,27 @@ def moveup_pen(ser, p0, point, up):
 
 
 # function that converts key points to a vector
-def get_vector_from_keypoints(keypoints, p0, name, img_width, img_height, rotate90):
+def get_vector_from_keypoints(keypoints, p0, name, img_width, img_height, scale, rotate90):
     vect = Vector(name=name)
     vect.points = []
     reachability = 0
     for i in range(len(keypoints)):
         p = Point('p{}'.format(i), x=keypoints[i][0], y=keypoints[i][1])
-        reachability |= imgf_to_robf(p, p0, img_width, img_height, rotate90)
+        reachability |= imgf_to_robf(p, p0, img_width, img_height, scale, rotate90)
         vect.points.append(p)
     return vect, reachability
 
 
+# Check if a point respects the robot physical and environmental limits
 def respects_boundaries(point):
-    x_max = 2970
-    y_max = 2100
-    return point.x < x_max and -y_max <= point.y <= y_max
+    x_min = 3000
+    x_max = 7000
+    y_min = -800
+    y_max = 2500
+    return x_min < point.x < x_max and y_min < point.y < y_max
 
 
+# Define a vector in the robot's memory
 def record_vector(ser, vector):
     dim = len(vector.points)
     # serial_tools.send(ser, 'DEFP {}'.format(vector.name))
@@ -170,3 +168,37 @@ def draw_circ_vector(ser, vector):
         serial_tools.send(ser, 'MOVEC {}[{}]'.format(vector.name, i+1))
         serial_tools.send(ser, 'HERE {}[{}]'.format(vector.name, i+1))
     serial_tools.send(ser, 'MOVEC {} 1 {}'.format(vector.name, n))
+
+
+def draw_in_robot_environment(p0, vector):
+    # environment definition
+    area_radius = 8510
+    area_width = 2*area_radius
+    area_height = 2*area_radius
+
+    # origin definition
+    origin = (area_radius, area_radius)
+    area = np.full((area_width, area_height, 3), 255, dtype=np.uint8)
+    cv2.arrowedLine(area, origin, (origin[0], origin[1]-800), (0, 255, 0), 100, 8)
+    cv2.arrowedLine(area, origin, (origin[0]-800, origin[1]), (0, 255, 0), 100, 8)
+    cv2.circle(area, origin, radius=1, color=(0, 0, 255), thickness=200)
+
+    # sheet definition
+    top_left = (origin[1] - 1835, origin[0] - 6199)
+    bottom_right = (origin[0] + 915, origin[0] - 4363)
+    cv2.rectangle(area, top_left, bottom_right, (255, 0, 0), 100)
+
+    # p0 definition
+    x0 = origin[1] - p0.y
+    y0 = origin[0] - p0.x
+    cv2.circle(area, (x0, y0), radius=1, color=(128, 0, 128), thickness=200)
+
+    # drawing definition
+    for i in range(len(vector.points)-1):
+        x1 = origin[1] - vector.points[i].y
+        y1 = origin[0] - vector.points[i].x
+        x2 = origin[1] - vector.points[i+1].y
+        y2 = origin[0] - vector.points[i+1].x
+        cv2.line(area, (x1, y1), (x2, y2), (128, 0, 128), 50)
+
+    cv2.imwrite('output-images/environment.png', area)
