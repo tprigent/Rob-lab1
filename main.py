@@ -1,5 +1,5 @@
 import platform
-
+import time
 import robot
 import serial_tools
 import acquisition
@@ -8,7 +8,7 @@ import tools
 
 if __name__ == '__main__':
 
-    # define serial port name
+    # STEP 1 : define serial port name
     if platform.system() == 'Darwin':
         serial_port = '/dev/ttys004'     # macOS
     else:
@@ -18,17 +18,16 @@ if __name__ == '__main__':
     ser = serial_tools.connect_serial(serial_port)
     if ser is None: exit(-1)
 
-    # home
+    # STEP 2 (optional): home
     tools.print_title("### HOME ROBOT ###")
     home = input("-> Do you want to set robot to home position ? (y|n) ")
     if home.lower() == 'y': serial_tools.send(ser, 'home')
 
-    # define input image
+    # STEP 3: image processing
+    tools.print_title("### IMAGE PROCESSING ###")
     image_name = 'test_draw_1.png'
     width, height = acquisition.get_image_format(image_name)
 
-    # image processing
-    tools.print_title("### IMAGE PROCESSING ###")
     all_points = acquisition.get_ordered_points(image_name, gen_video=0)    # get ordered points
     class_points = acquisition.identify_class(all_points, image_name)   # separate points into class
     segments = acquisition.extract_segments_from_class(class_points)    # extract extrema for each class (segments)
@@ -36,13 +35,13 @@ if __name__ == '__main__':
     curve_points = acquisition.curve_approx(all_points, line_points)    # add points to the curved path to improve shape
     acquisition.draw_segments(curve_points, image_name)                 # debug function: draw lines between points
 
-    # origin definition
+    # STEP 4: origin definition
     tools.print_title("### ORIGIN DEFINITION ###")
     p0 = robot.Point(name='p0')  # reference point
     # p0 = robot.Point(name='p0', x=6200, y=1841, z=1716, p=-840, r=-202, ptype='robot')
     input("-> Please set robot to origin (and press enter) ")
 
-    # point frame conversion
+    # STEP 5: point frame conversion (image to robot)
     tools.print_title("### POINT FRAME CONVERSION ###")
     robot.get_point_coordinates(ser, p0)
     v, reachability = robot.get_vector_from_keypoints(curve_points, p0, 'vect', width, height, scale=0.2, rotate90=0)
@@ -53,11 +52,16 @@ if __name__ == '__main__':
     user_check = input("-> Is origin correct ? (y|n) ")
     if user_check.lower() != 'y': exit(-1)
 
-    # record vector in robot memory
+    # STEP 6: record vector in robot memory
+    chrono = time.perf_counter()
     tools.print_title("### RECORDING POINTS IN ROBOT ###")
     robot.record_vector(ser, v)
 
-    # start drawing
+    # STEP 7: start drawing
     tools.print_title("### START DRAWING ###")
     robot.draw_vector(ser, v)
     robot.draw_circ_vector(ser, v)
+
+    # END : result
+    elapsed_time = time.perf_counter() - chrono
+    tools.print_title(f'Elapsed time: {elapsed_time:.2f} seconds')
