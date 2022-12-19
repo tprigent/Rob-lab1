@@ -208,7 +208,7 @@ def curve_path(cleaned_list, ordered_points):
     th=10
     epsilon=100
     for i in range(len(cleaned_list)-1):
-        a = cleaned_list[i+1][1]-cleaned_list[i][1]
+        a = cleaned_list[i+1][1]-cleaned_list[i][1]   
         b = cleaned_list[i][0]-cleaned_list[i+1][0]
         c = a*(cleaned_list[0][0]) + b*(cleaned_list[0][0])
         for j in range(len(ordered_points)-1):
@@ -253,6 +253,100 @@ def draw_segments(segments, image_name):
         cv2.circle(img, (int(x2), int(y2)), radius=1, color=(0, 0, 255), thickness=30)
 
     cv2.imwrite('output-images/lines.png'.format(image_name), img)
+
+#from start to finish, remove lines that don't match the drawing and. Get line and circle movements
+def comp_segments(all_points,segments, threshold, image_name):
+    
+    img = cv2.imread('input-images/{}'.format(image_name))
+    true_segments = []
+    for i in range(len(segments)-1):
+        y1, x1 = segments[i]         #get segment points
+        y2, x2 = segments[i+1]
+        cy, cx = (y1+y2)/2 , (x1+x2)/2       #get middle point/center of circle
+        dist_max = 0
+        dist_thresh_total = 0
+        dist_average = 0
+        remove_point = 0
+        width = 500
+        y4, x4 = 0,0
+        dist_1_2 = math.dist((y1,x1),(y2,x2))                 #segment distance
+        angle = math.atan2((y1-y2),(x1-x2))
+        radius = dist_1_2/2                                   #radius of circle
+        for j in range(len(all_points)-1):                    #compare segment line with all other points
+            y3, x3 = all_points[j]
+            if is_create_rectangle(y1,x1, y2,x2 , y3, x3):           #if's point inside circle
+                dist_1_3 = math.dist((y1,x1),(y3,x3))
+                dist_2_3 = math.dist((y2,x2),(y3,x3))                                               
+                dist_thresh = abs(dist_1_3 + dist_2_3 - dist_1_2)         #calc thresh average
+                dist_thresh_total += dist_thresh
+                if j != 0:
+                    dist_average = dist_thresh_total/j
+                if dist_max < dist_thresh:
+                    dist_max = dist_thresh
+                    y4 = y3
+                    x4 = x3                  
+            else:   #outside of circle
+                continue                                       #doesn't matter
+        
+        true_segments.append(segments[i])
+        #cv2.circle(img, (int(x1), int(y1)), radius=1, color=(0, 255, 0), thickness=30)
+        #img = cv2.putText(img, str(int(dist_max)), (int(x4) + 8, int(y4) + 8), cv2.FONT_HERSHEY_SIMPLEX,1, (255, 0, 0), 1, cv2.LINE_AA)
+        if dist_thresh_total > threshold:                            #not a perfect line
+            true_segments.append((y4,x4))
+            cv2.circle(img, (int(x4), int(y4)), radius=1, color=(0, 0, 255), thickness=30)  #movec
+            cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 10)          #red
+            #testing
+            cv2.line(img, (int(x1), int(y1)), (int(x4), int(y4)), (255, 0, 0), 1)          #debug distances
+            cv2.line(img, (int(x2), int(y2)), (int(x4), int(y4)), (255, 0, 0), 1)          #red          
+        #if remove_point == 0:
+        #else:
+            cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 10)        #normal line
+        img = cv2.putText(img, str(int(dist_average)), (int(x1) + 8, int(y1) + 8), cv2.FONT_HERSHEY_SIMPLEX,1, (255, 0, 0), 1, cv2.LINE_AA)
+        true_segments.append(segments[i+1])
+        cv2.circle(img, (int(x2), int(y2)), radius=1, color=(0, 255, 0), thickness=30)
+        
+    cv2.imwrite('output-images/true_segments.png'.format(image_name), img)            
+    return true_segments
+
+def is_create_rectangle(y1,x1, y2,x2 , yt, xt):
+    width = 500
+    origin = x1 , y1
+    length = math.dist((y1,x1),(y2,x2))
+    #get angle
+    angle = math.atan2((y1-y2),(x1-x2))
+    x_point, y_point = rotate(origin, (xt,yt), 2*math.pi -angle)
+    #create rectangle
+    tl_y = y1 + width
+    tl_x = x1
+    bl_y = y1 - width
+    bl_x = x1
+    
+    tr_y = y1 + width
+    tr_x = x1 + length
+    br_y = y2 - width
+    br_x = x1 + length
+    
+    if x_point > tl_x and x_point < tr_x and y_point > bl_y and y_point < tr_y:
+        return True
+    else: 
+        return False
+    
+
+def rotate(origin, point, angle):
+    """
+    Rotate a point counterclockwise by a given angle around a given origin.
+
+    The angle should be given in radians.
+    """
+    ox, oy = origin
+    px, py = point
+
+    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+    return qx, qy
+    
+    
+    
 
 
 def get_image_format(image_name):
