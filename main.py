@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     # serial connect
     ser = serial_tools.connect_serial(serial_port)
-    if ser is None: exit(-1)
+    #if ser is None: exit(-1)
 
     # home
     tools.print_title("### HOME ROBOT ###")
