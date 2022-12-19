@@ -136,7 +136,7 @@ def extract_POI(points):
     cleaned_list = []
     exception_list = []
     in_exception = 0
-    th = 120
+    th = 90    # 120
     for i in range(len(points) - 2):
         x1, y1 = points[i]
         x2, y2 = points[i + 1]
