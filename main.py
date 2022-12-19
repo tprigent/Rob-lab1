@@ -16,12 +16,12 @@ if __name__ == '__main__':
 
     # serial connect
     ser = serial_tools.connect_serial(serial_port)
-    #if ser is None: exit(-1)
+    if ser is None: exit(-1)
 
     # home
     tools.print_title("### HOME ROBOT ###")
-    #home = input("-> Do you want to set robot to home position ? (y|n) ")
-    #if home.lower() == 'y': serial_tools.send(ser, 'home')
+    home = input("-> Do you want to set robot to home position ? (y|n) ")
+    if home.lower() == 'y': serial_tools.send(ser, 'home')
 
     # define input image
     image_name = 'test_draw_2.png'
@@ -33,8 +33,7 @@ if __name__ == '__main__':
     class_points = acquisition.identify_class(all_points, image_name)    # separate points into class
     segments = acquisition.extract_segments_from_class(class_points)    # extract extrema for each class (segments)
     line_points = acquisition.extract_POI(segments)                     # downsample POI (eliminate nearest neighbours)
-    #acquisition.curve_path(points, all_points)
-    curve_points = acquisition.curve_approx(all_points, line_points)
+    curve_points = acquisition.curve_approx(all_points, line_points)    # add points to the curved path to improve shape
     acquisition.draw_segments(curve_points, image_name)                       # debug function: draw lines between points
 
 
@@ -47,7 +46,7 @@ if __name__ == '__main__':
     # point frame conversion
     tools.print_title("### POINT FRAME CONVERSION ###")
     robot.get_point_coordinates(ser, p0)
-    v, reachability = robot.get_vector_from_keypoints(points, p0, 'vect', width, height, scale=0.5, rotate90=0)
+    v, reachability = robot.get_vector_from_keypoints(curve_points, p0, 'vect', width, height, scale=0.5, rotate90=0)
     if reachability == 0:       # check reachability of all points
         print("-> Some points are not reachable. Please select another p0, orientation or reconsider the scale value.")
     p0.print()                  # reference check
