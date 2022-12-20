@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     # STEP 3: image processing
     tools.print_title("### IMAGE PROCESSING ###")
-    image_name = 'test_draw_2.png'
+    image_name = 'test_draw_1.png'
     width, height = acquisition.get_image_format(image_name)
 
     all_points = acquisition.get_ordered_points(image_name, gen_video=0)    # get ordered points
@@ -33,11 +33,12 @@ if __name__ == '__main__':
     segments = acquisition.extract_segments_from_class(class_points)    # extract extrema for each class (segments)
     line_points = acquisition.extract_POI(segments)                     # downsample POI (eliminate nearest neighbours)
     acquisition.draw_segments(line_points, image_name, 'lines.png')       # debug function: draw lines between points
+
+    # improve approximation
     curve_points = acquisition.curve_approx(all_points, line_points, 200)    # add points to the curved path to improve shape
-    acquisition.draw_segments(curve_points, image_name, 'curve1.png')       # debug function: draw lines between points
-    curve_points = acquisition.curve_approx(all_points, curve_points, 1000)    # add points to the curved path to improve shape
-    print(len(curve_points))
-    acquisition.draw_segments(curve_points, image_name, 'curve2.png')       # debug function: draw lines between points
+    acquisition.draw_segments(curve_points, image_name, 'curve1.png')
+    curve_points = acquisition.curve_approx(all_points, curve_points, 1000)
+    acquisition.draw_segments(curve_points, image_name, 'curve2.png')
 
     # STEP 4: origin definition
     tools.print_title("### ORIGIN DEFINITION ###")

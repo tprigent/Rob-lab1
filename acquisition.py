@@ -167,13 +167,13 @@ def curve_approx(all_points, line_points, th_accept):
     for p in line_points:
         candidate = (0, 0)
         min_dist = float('inf')
-        index_correspondance = 0
+        index_correspondence = 0
         for k in all_points:
             dist = tools.distance(p, k)
             if dist < min_dist:
-                candidate = index_correspondance
+                candidate = index_correspondence
                 min_dist = dist
-            index_correspondance += 1
+            index_correspondence += 1
         correspondences.append((index_lp, candidate))
         index_lp += 1
 
@@ -190,9 +190,11 @@ def curve_approx(all_points, line_points, th_accept):
         y3 = all_points[end][1]
 
         if tools.is_aligned(x1, y1, x2, y2, x3, y3, th=th_accept) == 0:
-            curve_points.append((all_points[round((start+end)/2)][0], all_points[round((start+end)/2)][1]))
+            middle_index = round((start+end)/2)
+            curve_points.append((all_points[middle_index][0], all_points[middle_index][1]))
 
     curve_points.append(line_points[-1])
+    print(len(curve_points))
     return curve_points
 
 
