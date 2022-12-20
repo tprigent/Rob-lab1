@@ -34,9 +34,10 @@ if __name__ == '__main__':
     line_points = acquisition.extract_POI(segments)                     # downsample POI (eliminate nearest neighbours)
     acquisition.draw_segments(line_points, image_name, 'lines.png')       # debug function: draw lines between points
     curve_points = acquisition.curve_approx(all_points, line_points, 200)    # add points to the curved path to improve shape
-    curve_points = acquisition.curve_approx(all_points, curve_points, 500)    # add points to the curved path to improve shape
+    acquisition.draw_segments(curve_points, image_name, 'curve1.png')       # debug function: draw lines between points
+    curve_points = acquisition.curve_approx(all_points, curve_points, 1000)    # add points to the curved path to improve shape
     print(len(curve_points))
-    acquisition.draw_segments(curve_points, image_name, 'curve.png')       # debug function: draw lines between points
+    acquisition.draw_segments(curve_points, image_name, 'curve2.png')       # debug function: draw lines between points
 
     # STEP 4: origin definition
     tools.print_title("### ORIGIN DEFINITION ###")
