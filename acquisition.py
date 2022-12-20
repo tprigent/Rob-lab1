@@ -160,7 +160,7 @@ def extract_POI(points):
     return cleaned_list
 
 
-def curve_approx(all_points, line_points):
+def curve_approx(all_points, line_points, th_accept):
     curve_points = []
     correspondences = []
     index_lp = 0
@@ -189,7 +189,7 @@ def curve_approx(all_points, line_points):
         x3 = all_points[end][0]
         y3 = all_points[end][1]
 
-        if tools.is_aligned(x1, y1, x2, y2, x3, y3, th=800) == 0:
+        if tools.is_aligned(x1, y1, x2, y2, x3, y3, th=th_accept) == 0:
             curve_points.append((all_points[round((start+end)/2)][0], all_points[round((start+end)/2)][1]))
 
     curve_points.append(line_points[-1])
@@ -241,7 +241,7 @@ def find_midcurve_index(ordered_points, point):
     return index
 
 
-def draw_segments(segments, image_name):
+def draw_segments(segments, image_name, out_name):
     img = cv2.imread('input-images/{}'.format(image_name))
 
     for i in range(len(segments)-1):
@@ -252,7 +252,7 @@ def draw_segments(segments, image_name):
         cv2.circle(img, (int(x1), int(y1)), radius=1, color=(0, 0, 255), thickness=30)
         cv2.circle(img, (int(x2), int(y2)), radius=1, color=(0, 0, 255), thickness=30)
 
-    cv2.imwrite('output-images/lines.png'.format(image_name), img)
+    cv2.imwrite('output-images/{}'.format(out_name), img)
 
 #from start to finish, remove lines that don't match the drawing and. Get line and circle movements
 def comp_segments(all_points,segments, threshold, image_name):
@@ -344,9 +344,6 @@ def rotate(origin, point, angle):
     qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
     qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
     return qx, qy
-
-
-
 
 
 def get_image_format(image_name):
