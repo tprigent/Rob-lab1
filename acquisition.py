@@ -195,7 +195,6 @@ def curve_approx(all_points, line_points, th_accept):
             curve_points.append((all_points[middle_index][0], all_points[middle_index][1]))
 
     curve_points.append(line_points[-1])
-    print(len(curve_points))
     return curve_points
 
 
