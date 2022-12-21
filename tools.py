@@ -1,5 +1,4 @@
 import datetime
-import math
 
 
 # Console text formatting for titles
@@ -39,18 +38,6 @@ def centroid(arr):
     return sum_x / length, sum_y / length
 
 
-def closest_centroid(points):
-    c = centroid(points)
-    closest_point = points[0]
-    closest_distance = math.inf
-    for point in points:
-        d = math.sqrt((point[0] - c[0]) ** 2 + (point[1] - c[1]) ** 2)
-        if d < closest_distance:
-            closest_point = point
-            closest_distance = d
-    return closest_point
-
-
 # Math: compute distance between two points
 def distance(point1, point2):
     # Calculate the Euclidean distance between two points
@@ -59,6 +46,7 @@ def distance(point1, point2):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
 
+# check if pt3 is aligned with pts 1 & 2, according to a threshold
 def is_aligned(x1, y1, x2, y2, x3, y3, th):
     if x1 == x2:
         return x1 - th <= x3 <= x1 + th
