@@ -30,13 +30,6 @@ class Vector:
             print('[{}] {} X={}  Y={}  Z={}  P={}  Z={}'.format(i, pt.name, pt.x, pt.y, pt.z, pt.p, pt.z))
 
 
-# create a point in robot's memory
-def init_point(ser, name):
-    serial_tools.send(ser, 'defp {}'.format(name))
-    serial_tools.send(ser, 'here {}'.format(name))
-    return Point(name=name)
-
-
 # fills Point instance with robot memory data
 def get_point_coordinates(ser=None, point=None):
     # get point info from robot
@@ -67,7 +60,7 @@ def get_point_coordinates(ser=None, point=None):
 
 # convert point related to image frame to the robot frame relatively to p0
 # + add of r, p, and r coordinates info
-def imgf_to_robf(point, p0, img_width, img_height, scale, rotate90):
+def imgf_to_robf(point, p0, img_width, img_height, scale):
     unit_factor = max(img_width, img_height)
     point.x = int(p0.x) - int(point.x * (min(img_width, img_height) / unit_factor) * scale)
     point.y = int(p0.y) - int(point.y * (min(img_width, img_height) / unit_factor) * scale)     # Y axis reverted in robot frame
@@ -80,13 +73,13 @@ def imgf_to_robf(point, p0, img_width, img_height, scale, rotate90):
 
 
 # function that converts key points to a vector
-def get_vector_from_keypoints(keypoints, p0, name, img_width, img_height, scale, rotate90):
+def get_vector_from_keypoints(keypoints, p0, name, img_width, img_height, scale):
     vect = Vector(name=name)
     vect.points = []
     reachability = 0
     for i in range(len(keypoints)):
         p = Point('p{}'.format(i), x=keypoints[i][0], y=keypoints[i][1])
-        reachability |= imgf_to_robf(p, p0, img_width, img_height, scale, rotate90)
+        reachability |= imgf_to_robf(p, p0, img_width, img_height, scale)
         vect.points.append(p)
     return vect, reachability
 

@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     # STEP 1 : define serial port name
     if platform.system() == 'Darwin':
-        serial_port = '/dev/cu.usbserial-14230'     # macOS
+        serial_port = '/dev/ttys002'     # macOS
     else:
         serial_port = "COM3"             # Windows
 
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     # improve approximation
     curve_points = acquisition.curve_approx(all_points, line_points, 200)    # add points to the curved path to improve shape
     curve_points = acquisition.curve_approx(all_points, curve_points, 1000)  # second iteration
-    acquisition.draw_segments(curve_points, image_name, 'lines-improved.png')
+    acquisition.draw_segments(curve_points, image_name, 'curves.png')
 
     # STEP 4: origin definition
     tools.print_title("### ORIGIN DEFINITION ###")

@@ -7,6 +7,8 @@ import numpy as np
 import math
 
 
+# ------------------- Image processing ------------------- #
+
 # get all black points of an image
 # down sample them by introducing discontinuities at a certain point rate
 # and computing the centroids of the remaining points
@@ -123,8 +125,8 @@ def extract_segments_from_class(class_points):
     # analyse remaining segments
     for i in range(1, len(class_points)):
         class_p = class_points[i][1]
-        if (class_p != current_class and class_p not in once) or len(class_points)-i <= 2:
-            segments.append(class_points[i-1][0])
+        if (class_p != current_class and class_p not in once) or len(class_points) - i <= 2:
+            segments.append(class_points[i - 1][0])
             segments.append(class_points[i][0])
             current_class = class_p
 
@@ -136,7 +138,7 @@ def extract_POI(points):
     cleaned_list = []
     exception_list = []
     in_exception = 0
-    th = 90    # 120
+    th = 90  # 120
     for i in range(len(points) - 2):
         x1, y1 = points[i]
         x2, y2 = points[i + 1]
@@ -178,33 +180,35 @@ def curve_approx(all_points, line_points, th_accept):
         correspondences.append((index_lp, candidate))
         index_lp += 1
 
-    for i in range(len(correspondences)-1):
+    for i in range(len(correspondences) - 1):
         curve_points.append(line_points[correspondences[i][0]])
         start = correspondences[i][1]
-        end = correspondences[i+1][1]
+        end = correspondences[i + 1][1]
 
         x1 = all_points[start][0]
         y1 = all_points[start][1]
-        x2 = all_points[round((end-start)/2)][0]
-        y2 = all_points[round((end-start) / 2)][1]
+        x2 = all_points[round((end - start) / 2)][0]
+        y2 = all_points[round((end - start) / 2)][1]
         x3 = all_points[end][0]
         y3 = all_points[end][1]
 
         if tools.is_aligned(x1, y1, x2, y2, x3, y3, th=th_accept) == 0:
-            middle_index = round((start+end)/2)
+            middle_index = round((start + end) / 2)
             curve_points.append((all_points[middle_index][0], all_points[middle_index][1]))
 
     curve_points.append(line_points[-1])
     return curve_points
 
 
+# ------------------ Display results ------------------#
+
 # robot drawing simulation (image) given the input points
 def draw_segments(segments, image_name, out_name):
     img = cv2.imread('input-images/{}'.format(image_name))
 
-    for i in range(len(segments)-1):
+    for i in range(len(segments) - 1):
         y1, x1 = segments[i]
-        y2, x2 = segments[i+1]
+        y2, x2 = segments[i + 1]
 
         cv2.line(img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 10)
         cv2.circle(img, (int(x1), int(y1)), radius=1, color=(0, 0, 255), thickness=30)
@@ -243,14 +247,14 @@ def generate_video(points, image_name):
 def draw_in_robot_environment(p0, vector):
     # environment definition
     area_radius = 8510
-    area_width = 2*area_radius
-    area_height = 2*area_radius
+    area_width = 2 * area_radius
+    area_height = 2 * area_radius
 
     # origin definition
     origin = (area_radius, area_radius)
     area = np.full((area_width, area_height, 3), 255, dtype=np.uint8)
-    cv2.arrowedLine(area, origin, (origin[0], origin[1]-800), (0, 255, 0), 100, 8)
-    cv2.arrowedLine(area, origin, (origin[0]-800, origin[1]), (0, 255, 0), 100, 8)
+    cv2.arrowedLine(area, origin, (origin[0], origin[1] - 800), (0, 255, 0), 100, 8)
+    cv2.arrowedLine(area, origin, (origin[0] - 800, origin[1]), (0, 255, 0), 100, 8)
     cv2.circle(area, origin, radius=1, color=(0, 0, 255), thickness=200)
 
     # sheet definition
@@ -264,11 +268,11 @@ def draw_in_robot_environment(p0, vector):
     cv2.circle(area, (x0, y0), radius=1, color=(128, 0, 128), thickness=200)
 
     # drawing definition
-    for i in range(len(vector.points)-1):
+    for i in range(len(vector.points) - 1):
         x1 = origin[1] - vector.points[i].y
         y1 = origin[0] - vector.points[i].x
-        x2 = origin[1] - vector.points[i+1].y
-        y2 = origin[0] - vector.points[i+1].x
+        x2 = origin[1] - vector.points[i + 1].y
+        y2 = origin[0] - vector.points[i + 1].x
         cv2.line(area, (x1, y1), (x2, y2), (128, 0, 128), 50)
 
     cv2.imwrite('output-images/environment.png', area)
