@@ -11,7 +11,8 @@ This path, not known in advance was given in the form of an image.
 A computer was used to process the image, to generate a sequence of points and movements to be exectuted by the robot, 
 over a RS232-serial connexion.
 
-<!-- insert image here -->
+![Robotics - lab 1 drawio](https://user-images.githubusercontent.com/14911193/210113706-fdd1ed36-9d1f-423a-8683-d9ade36f3d68.png)
+
 
 Two main fields were thus involved in this project: image processing and control.
 
@@ -67,7 +68,8 @@ For both given images, here are the results, assuming that the robot will draw s
 
 | [`test_draw_1.png`](/input-images/test_draw_1.png) | [`test_draw_2.png`](/input-images/test_draw_2.png) |
 |----------------------------------------------------|----------------------------------------------------|
-|                                                    |                                                    |
+|        <img width="180" alt="Draw1 with lines" src="https://user-images.githubusercontent.com/14911193/210113802-068c44ac-34df-4e88-aa1f-aee6f2bd92c1.png"> |  <img width="180" alt="Draw2 with lines" src="https://user-images.githubusercontent.com/14911193/210113891-1da6610c-f330-42c4-8b31-769efeb51527.png">
+  |
 
 As it is impossible for us to move the pen up, we see some incorrectness, especially for closed shapes including crossings (like `test_draw_2.png`).
 
@@ -93,14 +95,15 @@ Moreover, a neat display of the steps of the script is generated, but also of th
 
 *NB: The serial port must be edited in the main script (very beginning).*
 
-<!-- insert photo here -->
+<img width="400" alt="Console output" src="https://user-images.githubusercontent.com/14911193/210113944-4fa7f168-8a79-444e-9569-e24ed2ef953d.png">
+
 
 ### iii. Results
 The results using the robot are the following:
 
 | [`test_draw_1.png`](/input-images/test_draw_1.png)      | [`test_draw_2.png`](/input-images/test_draw_2.png)      |
 |---------------------------------------------------------|---------------------------------------------------------|
-|                                                         |                                                         |
+| <img width="180" alt="Draw1 robot" src="https://user-images.githubusercontent.com/14911193/210113969-659f5f37-d762-45dc-9165-bbeae94748c9.png"> | <img width="180" alt="Draw2 robot" src="https://user-images.githubusercontent.com/14911193/210114228-76571831-4709-42a4-a434-d9a77a2aa774.png"> |
 | [Corresponding video](https://go.tprigent.fr/Rob-draw1) | [Corresponding video](https://go.tprigent.fr/Rob-draw2) | 
 
 Here, we can see that we have some incorrectness regarding the original drawing:
